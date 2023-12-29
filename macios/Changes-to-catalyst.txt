@@ -1,0 +1,1270 @@
+2,8c2,3
+< # Useful targets:
+< # - all             - build everything
+< # - macOS           - build everything for macOS
+< # - iOS             - build everything for iOS
+< # - tvOS            - build everything for tvOS
+< # - watchOS         - build everything for watchOS
+< # - macCatalyst 	- build for Mac Catalyst
+---
+> # Useful Targets:
+> # - all - build for MAC CATALYST
+10c5,7
+< # Current directory
+---
+> DEFAULT_GOAL := all
+> 
+> # Current director
+23,31c20
+< # The binary releases of dependencies, published at:
+< # macOS:
+< #     https://github.com/beeware/cpython-macOS-source-deps/releases
+< # iOS, tvOS, watchOS:
+< #     https://github.com/beeware/cpython-apple-source-deps/releases
+< BZIP2_VERSION=1.0.8-1
+< XZ_VERSION=5.4.4-1
+< OPENSSL_VERSION=3.0.12-1
+< LIBFFI_VERSION=3.4.4-1
+---
+> BZIP2_VERSION=1.0.8
+33,34c22
+< # Supported OS
+< OS_LIST=macOS iOS tvOS watchOS
+---
+> XZ_VERSION=5.4.2
+36c24,30
+< CURL_FLAGS=--disable --fail --location --create-dirs --progress-bar
+---
+> # Preference is to use OpenSSL 3; however, Cryptography 3.4.8 (and
+> # probably some other packages as well) only works with 1.1.1, so
+> # we need to preserve the ability to build the older OpenSSL (for now...)
+> OPENSSL_VERSION=3.1.0
+> # OPENSSL_VERSION_NUMBER=1.1.1
+> # OPENSSL_REVISION=q
+> # OPENSSL_VERSION=$(OPENSSL_VERSION_NUMBER)$(OPENSSL_REVISION)
+38,41c32
+< # macOS targets
+< TARGETS-macOS=macosx.x86_64 macosx.arm64
+< VERSION_MIN-macOS=11.0
+< CFLAGS-macOS=-mmacosx-version-min=$(VERSION_MIN-macOS)
+---
+> LIBFFI_VERSION=3.4.2
+42a34,39
+> # Supported OS and dependencies
+> DEPENDENCIES=BZip2 XZ OpenSSL libFFI
+> OS_LIST=iOS
+> 
+> CURL_FLAGS=--disable --fail --location --create-dirs --progress-bar
+> 
+44,45c41,42
+< TARGETS-iOS=iphonesimulator.x86_64 iphonesimulator.arm64 iphoneos.arm64
+< VERSION_MIN-iOS=12.0
+---
+> TARGETS-iOS=macosx.arm64 macosx.x86_64
+> VERSION_MIN-iOS=14.0
+48,59d44
+< # tvOS targets
+< TARGETS-tvOS=appletvsimulator.x86_64 appletvsimulator.arm64 appletvos.arm64
+< VERSION_MIN-tvOS=9.0
+< CFLAGS-tvOS=-mtvos-version-min=$(VERSION_MIN-tvOS)
+< PYTHON_CONFIGURE-tvOS=ac_cv_func_sigaltstack=no
+< 
+< # watchOS targets
+< TARGETS-watchOS=watchsimulator.x86_64 watchsimulator.arm64 watchos.arm64_32
+< VERSION_MIN-watchOS=4.0
+< CFLAGS-watchOS=-mwatchos-version-min=$(VERSION_MIN-watchOS)
+< PYTHON_CONFIGURE-watchOS=ac_cv_func_sigaltstack=no
+< 
+62c47,49
+< HOST_PYTHON=$(shell which python$(PYTHON_VER))
+---
+> HOST_PYTHON=install/macOS/macosx/python-$(PYTHON_VERSION)
+> HOST_PYTHON_EXE=$(HOST_PYTHON)/bin/python3
+> BDIST_WHEEL=$(HOST_PYTHON)/lib/python$(PYTHON_VER)/site-packages/wheel/bdist_wheel.py
+70c57
+< all: $(OS_LIST) macCatalyst
+---
+> all: $(OS_LIST)
+73,76c60,63
+< 	all clean distclean update-patch vars \
+< 	$(foreach os,$(OS_LIST),$(os) clean-$(os) dev-clean-$(os) vars-$(os)) \
+< 	$(foreach os,$(OS_LIST),$(foreach sdk,$$(sort $$(basename $$(TARGETS-$(os)))),$(sdk) vars-$(sdk)))
+< 	$(foreach os,$(OS_LIST),$(foreach target,$$(TARGETS-$(os)),$(target) vars-$(target)))
+---
+> 	all clean distclean update-patch vars wheels \
+> 	$(foreach product,$(PRODUCTS),$(product) $(foreach os,$(OS_LIST),$(product)-$(os) clean-$(product) clean-$(product)-$(os))) \
+> 	$(foreach product,$(PRODUCTS),$(product)-wheels $(foreach os,$(OS_LIST),$(product)-wheels-$(os) clean-$(product)-wheels-$(os))) \
+> 	$(foreach os,$(OS_LIST),$(os) wheels-$(os) clean-$(os) clean-wheels-$(os) vars-$(os))
+77a65,68
+> # Clean all builds
+> clean:
+> 	rm -rf build install merge dist support wheels
+> 
+80c71
+< 	rm -rf downloads build dist install support
+---
+> 	rm -rf downloads
+82,87c73,74
+< macCatalyst:
+< 	$(MAKE) -C macios
+< 	-mkdir support/macios
+< 	cp -r macios/support/* support/macios
+< 	-mkdir dist/macios
+< 	cp -r macios/dist/* dist/macios
+---
+> install/macOS/macosx/python-3.11.6/bin/python3:
+> 	sh macOS.sh
+88a76,82
+> downloads: \
+> 		downloads/bzip2-$(BZIP2_VERSION).tar.gz \
+> 		downloads/xz-$(XZ_VERSION).tar.gz \
+> 		downloads/openssl-$(OPENSSL_VERSION).tar.gz \
+> 		downloads/libffi-$(LIBFFI_VERSION).tar.gz \
+> 		downloads/Python-$(PYTHON_VERSION).tar.gz
+> 
+105a100,143
+> # Setup: BZip2
+> ###########################################################################
+> 
+> # Download original BZip2 source code archive.
+> downloads/bzip2-$(BZIP2_VERSION).tar.gz:
+> 	@echo ">>> Download BZip2 sources"
+> 	curl $(CURL_FLAGS) -o $@ \
+> 		https://sourceware.org/pub/bzip2/$(notdir $@)
+> 
+> ###########################################################################
+> # Setup: XZ (LZMA)
+> ###########################################################################
+> 
+> # Download original XZ source code archive.
+> downloads/xz-$(XZ_VERSION).tar.gz:
+> 	@echo ">>> Download XZ sources"
+> 	curl $(CURL_FLAGS) -o $@ \
+> 		https://tukaani.org/xz/$(notdir $@)
+> 
+> ###########################################################################
+> # Setup: OpenSSL
+> # These build instructions adapted from the scripts developed by
+> # Felix Shchulze (@x2on) https://github.com/x2on/OpenSSL-for-iPhone
+> ###########################################################################
+> 
+> # Download original OpenSSL source code archive.
+> downloads/openssl-$(OPENSSL_VERSION).tar.gz:
+> 	@echo ">>> Download OpenSSL sources"
+> 	curl $(CURL_FLAGS) -o $@ \
+> 		https://www.openssl.org/source/$(notdir $@) \
+> 		|| curl $(CURL_FLAGS) -o $@ \
+> 			https://www.openssl.org/source/old/$(basename $(OPENSSL_VERSION))/$(notdir $@)
+> 
+> ###########################################################################
+> # Setup: libFFI
+> ###########################################################################
+> 
+> # Download original libFFI source code archive.
+> downloads/libffi-$(LIBFFI_VERSION).tar.gz:
+> 	@echo ">>> Download libFFI sources"
+> 	curl $(CURL_FLAGS) -o $@ \
+> 		https://github.com/libffi/libffi/releases/download/v$(LIBFFI_VERSION)/$(notdir $@)
+> 
+> ###########################################################################
+108a147
+> # Download original Python source code archive.
+111d149
+< 	mkdir -p downloads
+113c151
+< 		https://www.python.org/ftp/python/$(PYTHON_MICRO_VERSION)/Python-$(PYTHON_VERSION).tgz
+---
+> 		https://www.python.org/ftp/python/$(PYTHON_MICRO_VERSION)/$(basename $(basename $(notdir $@))).tgz
+128a167
+> WHEEL_TAG-$(target)=py3-none-$$(OS_LOWER-$(target))_$$(shell echo $$(VERSION_MIN-$(os))_$(target) | sed "s/\./_/g")
+134,137c173,175
+< WHEEL_TAG-$(target)=py3-none-$$(shell echo $$(OS_LOWER-$(target))_$$(VERSION_MIN-$(os))_$(target) | sed "s/\./_/g")
+< 
+< ifeq ($(os),macOS)
+< TARGET_TRIPLE-$(target)=$$(ARCH-$(target))-apple-darwin
+---
+> ifeq ($(target),macosx.x86_64)
+> TARGET_TRIPLE-$(target)=x86_64-apple-ios14.0-macabi
+> TARGET_TRI-$(target)=x86_64-apple-ios14.0
+139,143c177,178
+< 	ifeq ($$(findstring simulator,$$(SDK-$(target))),)
+< TARGET_TRIPLE-$(target)=$$(ARCH-$(target))-apple-$$(OS_LOWER-$(target))$$(VERSION_MIN-$(os))
+< 	else
+< TARGET_TRIPLE-$(target)=$$(ARCH-$(target))-apple-$$(OS_LOWER-$(target))$$(VERSION_MIN-$(os))-simulator
+< 	endif
+---
+> TARGET_TRIPLE-$(target)=arm64-apple-ios14.0-macabi
+> TARGET_TRI-$(target)=arm64-apple-ios14.0
+146a182,185
+> CC-$(target)=xcrun --sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))
+> CPP-$(target)=xcrun --sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target)) -E
+> CXX-$(target)=xcrun --sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))
+> AR-$(target)=xcrun --sdk $$(SDK-$(target)) ar
+151,160d189
+< # Target: Aliases
+< ###########################################################################
+< 
+< support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(target))-clang:
+< 	patch/make-xcrun-alias $$@ "--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))"
+< 
+< support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(target))-cpp:
+< 	patch/make-xcrun-alias $$@ "--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target)) -E"
+< 
+< ###########################################################################
+163a193
+> BZIP2_SRCDIR-$(target)=build/$(os)/$(target)/bzip2-$(BZIP2_VERSION)
+165a196,197
+> BZIP2_WHEEL-$(target)=wheels/dist/bzip2/bzip2-$(BZIP2_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
+> BZIP2_WHEEL_DISTINFO-$(target)=$$(BZIP2_INSTALL-$(target))/wheel/bzip2-$(BZIP2_VERSION).dist-info
+167,171c199,204
+< downloads/bzip2-$(BZIP2_VERSION)-$(target).tar.gz:
+< 	@echo ">>> Download BZip2 for $(target)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-apple-source-deps/releases/download/BZip2-$(BZIP2_VERSION)/bzip2-$(BZIP2_VERSION)-$(target).tar.gz
+---
+> $$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz
+> 	@echo ">>> Unpack BZip2 sources for $(target)"
+> 	mkdir -p $$(BZIP2_SRCDIR-$(target))
+> 	tar zxf $$< --strip-components 1 -C $$(BZIP2_SRCDIR-$(target))
+> 	# Touch the makefile to ensure that Make identifies it as up to date.
+> 	touch $$(BZIP2_SRCDIR-$(target))/Makefile
+173,178c206,214
+< $$(BZIP2_LIB-$(target)): downloads/bzip2-$(BZIP2_VERSION)-$(target).tar.gz
+< 	@echo ">>> Install BZip2 for $(target)"
+< 	mkdir -p $$(BZIP2_INSTALL-$(target))
+< 	cd $$(BZIP2_INSTALL-$(target)) && tar zxvf $(PROJECT_DIR)/downloads/bzip2-$(BZIP2_VERSION)-$(target).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(BZIP2_LIB-$(target))
+---
+> $$(BZIP2_LIB-$(target)): $$(BZIP2_SRCDIR-$(target))/Makefile
+> 	@echo ">>> Build BZip2 for $(target)"
+> 	cd $$(BZIP2_SRCDIR-$(target)) && \
+> 		make install \
+> 			PREFIX="$$(BZIP2_INSTALL-$(target))" \
+> 			CC="$$(CC-$(target))" \
+> 			CFLAGS="$$(CFLAGS-$(target))" \
+> 			LDFLAGS="$$(LDFLAGS-$(target))" \
+> 			2>&1 | tee -a ../bzip2-$(BZIP2_VERSION).build.log
+179a216,245
+> $$(BZIP2_WHEEL-$(target)): $$(BZIP2_LIB-$(target)) $$(BDIST_WHEEL)
+> 	@echo ">>> Build BZip2 wheel for $(target)"
+> 	mkdir -p $$(BZIP2_WHEEL_DISTINFO-$(target))
+> 	mkdir -p $$(BZIP2_INSTALL-$(target))/wheel/opt
+> 
+> 	# Copy distributable content
+> 	cp -r $$(BZIP2_INSTALL-$(target))/include $$(BZIP2_INSTALL-$(target))/wheel/opt/include
+> 	cp -r $$(BZIP2_INSTALL-$(target))/lib $$(BZIP2_INSTALL-$(target))/wheel/opt/lib
+> 
+> 	# Copy LICENSE file
+> 	cp $$(BZIP2_SRCDIR-$(target))/LICENSE $$(BZIP2_WHEEL_DISTINFO-$(target))
+> 
+> 	# Write package metadata
+> 	echo "Metadata-Version: 1.2" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Name: bzip2" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Version: $(BZIP2_VERSION)" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Summary: " >> $$(BZIP2_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Download-URL: " >> $$(BZIP2_WHEEL_DISTINFO-$(target))/METADATA
+> 
+> 	# Write wheel metadata
+> 	echo "Wheel-Version: 1.0" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Root-Is-Purelib: false" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Generator: Python-Apple-support.BeeWare" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Build: 1" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Tag: $$(WHEEL_TAG-$(target))" >> $$(BZIP2_WHEEL_DISTINFO-$(target))/WHEEL
+> 
+> 	# Pack the wheel
+> 	mkdir -p wheels/dist/bzip2
+> 	$(HOST_PYTHON_EXE) -m wheel pack $$(BZIP2_INSTALL-$(target))/wheel --dest-dir wheels/dist/bzip2 --build-number 1
+> 
+183a250
+> XZ_SRCDIR-$(target)=build/$(os)/$(target)/xz-$(XZ_VERSION)
+185a253,254
+> XZ_WHEEL-$(target)=wheels/dist/xz/xz-$(XZ_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
+> XZ_WHEEL_DISTINFO-$(target)=$$(XZ_INSTALL-$(target))/wheel/xz-$(XZ_VERSION).dist-info
+187,191c256,272
+< downloads/xz-$(XZ_VERSION)-$(target).tar.gz:
+< 	@echo ">>> Download XZ for $(target)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-apple-source-deps/releases/download/XZ-$(XZ_VERSION)/xz-$(XZ_VERSION)-$(target).tar.gz
+---
+> $$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz
+> 	@echo ">>> Unpack XZ sources for $(target)"
+> 	mkdir -p $$(XZ_SRCDIR-$(target))
+> 	tar zxf $$< --strip-components 1 -C $$(XZ_SRCDIR-$(target))
+> 	# Patch the source to add support for new platforms
+> 	cd $$(XZ_SRCDIR-$(target)) && patch -p1 < $(PROJECT_DIR)/patch/xz-$(XZ_VERSION).patch
+> 	# Configure the build
+> 	cd $$(XZ_SRCDIR-$(target)) && \
+> 		./configure \
+> 			CC="$$(CC-$(target))" \
+> 			CFLAGS="$$(CFLAGS-$(target))" \
+> 			LDFLAGS="$$(LDFLAGS-$(target))" \
+> 			--disable-shared \
+> 			--enable-static \
+> 			--host=$$(TARGET_TRI-$(target)) \
+> 			--prefix="$$(XZ_INSTALL-$(target))" \
+> 			2>&1 | tee -a ../xz-$(XZ_VERSION).config.log
+193,198c274,278
+< $$(XZ_LIB-$(target)): downloads/xz-$(XZ_VERSION)-$(target).tar.gz
+< 	@echo ">>> Install XZ for $(target)"
+< 	mkdir -p $$(XZ_INSTALL-$(target))
+< 	cd $$(XZ_INSTALL-$(target)) && tar zxvf $(PROJECT_DIR)/downloads/xz-$(XZ_VERSION)-$(target).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(XZ_LIB-$(target))
+---
+> $$(XZ_LIB-$(target)): $$(XZ_SRCDIR-$(target))/Makefile
+> 	@echo ">>> Build and install XZ for $(target)"
+> 	cd $$(XZ_SRCDIR-$(target)) && \
+> 		make install \
+> 			2>&1 | tee -a ../xz-$(XZ_VERSION).build.log
+199a280,310
+> $$(XZ_WHEEL-$(target)): $$(XZ_LIB-$(target)) $$(BDIST_WHEEL)
+> 	@echo ">>> Build XZ wheel for $(target)"
+> 	mkdir -p $$(XZ_WHEEL_DISTINFO-$(target))
+> 	mkdir -p $$(XZ_INSTALL-$(target))/wheel/opt
+> 
+> 	# Copy distributable content
+> 	cp -r $$(XZ_INSTALL-$(target))/include $$(XZ_INSTALL-$(target))/wheel/opt/include
+> 	cp -r $$(XZ_INSTALL-$(target))/lib $$(XZ_INSTALL-$(target))/wheel/opt/lib
+> 
+> 	# Copy license files
+> 	cp $$(XZ_SRCDIR-$(target))/COPYING $$(XZ_WHEEL_DISTINFO-$(target))/LICENSE
+> 	cp $$(XZ_SRCDIR-$(target))/COPYING.* $$(XZ_WHEEL_DISTINFO-$(target))
+> 
+> 	# Write package metadata
+> 	echo "Metadata-Version: 1.2" >> $$(XZ_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Name: xz" >> $$(XZ_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Version: $(XZ_VERSION)" >> $$(XZ_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Summary: " >> $$(XZ_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Download-URL: " >> $$(XZ_WHEEL_DISTINFO-$(target))/METADATA
+> 
+> 	# Write wheel metadata
+> 	echo "Wheel-Version: 1.0" >> $$(XZ_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Root-Is-Purelib: false" >> $$(XZ_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Generator: Python-Apple-support.BeeWare" >> $$(XZ_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Build: 1" >> $$(XZ_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Tag: $$(WHEEL_TAG-$(target))" >> $$(XZ_WHEEL_DISTINFO-$(target))/WHEEL
+> 
+> 	# Pack the wheel
+> 	mkdir -p wheels/dist/xz
+> 	$(HOST_PYTHON_EXE) -m wheel pack $$(XZ_INSTALL-$(target))/wheel --dest-dir wheels/dist/xz --build-number 1
+> 
+203a315
+> OPENSSL_SRCDIR-$(target)=build/$(os)/$(target)/openssl-$(OPENSSL_VERSION)
+205a318,320
+> OPENSSL_CRYPTO_LIB-$(target)=$$(OPENSSL_INSTALL-$(target))/lib/libcrypto.a
+> OPENSSL_WHEEL-$(target)=wheels/dist/openssl/openssl-$(OPENSSL_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
+> OPENSSL_WHEEL_DISTINFO-$(target)=$$(OPENSSL_INSTALL-$(target))/wheel/openssl-$(OPENSSL_VERSION).dist-info
+207,211c322,325
+< downloads/openssl-$(OPENSSL_VERSION)-$(target).tar.gz:
+< 	@echo ">>> Download OpenSSL for $(target)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-apple-source-deps/releases/download/OpenSSL-$(OPENSSL_VERSION)/openssl-$(OPENSSL_VERSION)-$(target).tar.gz
+---
+> $$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz
+> 	@echo ">>> Unpack and configure OpenSSL sources for $(target)"
+> 	mkdir -p $$(OPENSSL_SRCDIR-$(target))
+> 	tar zxf $$< --strip-components 1 -C $$(OPENSSL_SRCDIR-$(target))
+213c327,374
+< $$(OPENSSL_SSL_LIB-$(target)): downloads/openssl-$(OPENSSL_VERSION)-$(target).tar.gz
+---
+> ifneq ($(os),macOS)
+> 	# Patch code to disable the use of fork as it's not available on $(os)
+> ifeq ($(OPENSSL_VERSION_NUMBER),1.1.1)
+> 	sed -ie 's/define HAVE_FORK 1/define HAVE_FORK 0/' $$(OPENSSL_SRCDIR-$(target))/apps/speed.c
+> 	sed -ie 's/define HAVE_FORK 1/define HAVE_FORK 0/' $$(OPENSSL_SRCDIR-$(target))/apps/ocsp.c
+> else
+> 	sed -ie 's/define HAVE_FORK 1/define HAVE_FORK 0/' $$(OPENSSL_SRCDIR-$(target))/apps/include/http_server.h
+> 	sed -ie 's/define HAVE_FORK 1/define HAVE_FORK 0/' $$(OPENSSL_SRCDIR-$(target))/apps/speed.c
+> endif
+> endif
+> 
+> 	# Configure the OpenSSL build
+> ifeq ($(os),macOS)
+> 	cd $$(OPENSSL_SRCDIR-$(target)) && \
+> 		CC="$$(CC-$(target)) $$(CFLAGS-$(target))" \
+> 		./Configure darwin64-$$(ARCH-$(target))-cc no-tests \
+> 			--prefix="$$(OPENSSL_INSTALL-$(target))" \
+> 			--openssldir=/etc/ssl \
+> 			2>&1 | tee -a ../openssl-$(OPENSSL_VERSION).config.log
+> else
+> 	cd $$(OPENSSL_SRCDIR-$(target)) && \
+> 		CC="$$(CC-$(target)) $$(CFLAGS-$(target))" \
+> 		CROSS_TOP="$$(dir $$(SDK_ROOT-$(target))).." \
+> 		CROSS_SDK="$$(notdir $$(SDK_ROOT-$(target)))" \
+> 		./Configure iphoneos-cross no-asm no-tests \
+> 			--prefix="$$(OPENSSL_INSTALL-$(target))" \
+> 			--openssldir=/etc/ssl \
+> 			2>&1 | tee -a ../openssl-$(OPENSSL_VERSION).config.log
+> endif
+> 	# The OpenSSL Makefile is... interesting. Invoking `make all` or `make
+> 	# install` *modifies the Makefile*. Therefore, we can't use the Makefile as
+> 	# a build dependency, because building/installing dirties the target that
+> 	# was used as a dependency. To compensate, create a dummy file as a marker
+> 	# for whether OpenSSL has been configured, and use *that* as a reference.
+> 	date > $$(OPENSSL_SRCDIR-$(target))/is_configured
+> 
+> $$(OPENSSL_SRCDIR-$(target))/libssl.a: $$(OPENSSL_SRCDIR-$(target))/is_configured
+> 	@echo ">>> Build OpenSSL for $(target)"
+> 	# OpenSSL's `all` target modifies the Makefile;
+> 	# use the raw targets that make up all and it's dependencies
+> 	cd $$(OPENSSL_SRCDIR-$(target)) && \
+> 		CC="$$(CC-$(target)) $$(CFLAGS-$(target))" \
+> 		CROSS_TOP="$$(dir $$(SDK_ROOT-$(target))).." \
+> 		CROSS_SDK="$$(notdir $$(SDK_ROOT-$(target)))" \
+> 		make build_sw \
+> 			2>&1 | tee -a ../openssl-$(OPENSSL_VERSION).build.log
+> 
+> $$(OPENSSL_SSL_LIB-$(target)): $$(OPENSSL_SRCDIR-$(target))/libssl.a
+215,218c376,382
+< 	mkdir -p $$(OPENSSL_INSTALL-$(target))
+< 	cd $$(OPENSSL_INSTALL-$(target)) && tar zxvf $(PROJECT_DIR)/downloads/openssl-$(OPENSSL_VERSION)-$(target).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(OPENSSL_SSL_LIB-$(target))
+---
+> 	# Install just the software (not the docs)
+> 	cd $$(OPENSSL_SRCDIR-$(target)) && \
+> 		CC="$$(CC-$(target)) $$(CFLAGS-$(target))" \
+> 		CROSS_TOP="$$(dir $$(SDK_ROOT-$(target))).." \
+> 		CROSS_SDK="$$(notdir $$(SDK_ROOT-$(target)))" \
+> 		make install_sw \
+> 			2>&1 | tee -a ../openssl-$(OPENSSL_VERSION).install.log
+219a384,421
+> $$(OPENSSL_WHEEL-$(target)): $$(OPENSSL_LIB-$(target)) $$(BDIST_WHEEL)
+> 	@echo ">>> Build OpenSSL wheel for $(target)"
+> 	mkdir -p $$(OPENSSL_WHEEL_DISTINFO-$(target))
+> 	mkdir -p $$(OPENSSL_INSTALL-$(target))/wheel/opt
+> 
+> 	# Copy distributable content
+> 	cp -r $$(OPENSSL_INSTALL-$(target))/include $$(OPENSSL_INSTALL-$(target))/wheel/opt/include
+> 	cp -r $$(OPENSSL_INSTALL-$(target))/lib $$(OPENSSL_INSTALL-$(target))/wheel/opt/lib
+> 
+> 	# Remove dynamic library content
+> 	rm -f $$(OPENSSL_INSTALL-$(target))/wheel/opt/lib/*.dylib
+> 
+> 	# Copy LICENSE file
+> 	# OpenSSL 1.1.1 uses LICENSE; OpenSSL 3 uses LICENSE.txt
+> 	if [ -f "$$(OPENSSL_SRCDIR-$(target))/LICENSE.txt" ]; then \
+> 		cp $$(OPENSSL_SRCDIR-$(target))/LICENSE.txt $$(OPENSSL_WHEEL_DISTINFO-$(target))/LICENSE; \
+> 	else \
+> 		cp $$(OPENSSL_SRCDIR-$(target))/LICENSE $$(OPENSSL_WHEEL_DISTINFO-$(target))/LICENSE; \
+> 	fi
+> 
+> 	# Write package metadata
+> 	echo "Metadata-Version: 1.2" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Name: openssl" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Version: $(OPENSSL_VERSION)" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Summary: " >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Download-URL: " >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/METADATA
+> 
+> 	# Write wheel metadata
+> 	echo "Wheel-Version: 1.0" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Root-Is-Purelib: false" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Generator: Python-Apple-support.BeeWare" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Build: 1" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Tag: $$(WHEEL_TAG-$(target))" >> $$(OPENSSL_WHEEL_DISTINFO-$(target))/WHEEL
+> 
+> 	# Pack the wheel
+> 	mkdir -p wheels/dist/openssl
+> 	$(HOST_PYTHON_EXE) -m wheel pack $$(OPENSSL_INSTALL-$(target))/wheel --dest-dir wheels/dist/openssl --build-number 1
+> 
+229,230c431,435
+< LIBFFI_INSTALL-$(target)=$(PROJECT_DIR)/install/$(os)/$(target)/libffi-$(LIBFFI_VERSION)
+< LIBFFI_LIB-$(target)=$$(LIBFFI_INSTALL-$(target))/lib/libffi.a
+---
+> LIBFFI_SRCDIR-$(os)=build/$(os)/libffi-$(LIBFFI_VERSION)
+> LIBFFI_SRCDIR-$(target)=$$(LIBFFI_SRCDIR-$(os))/build_$$(SDK-$(target))-$$(ARCH-$(target))
+> LIBFFI_LIB-$(target)=$$(LIBFFI_SRCDIR-$(target))/.libs/libffi.a
+> LIBFFI_WHEEL-$(target)=wheels/dist/libffi/libffi-$(LIBFFI_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
+> LIBFFI_WHEEL_DISTINFO-$(target)=$$(LIBFFI_SRCDIR-$(target))/wheel/libffi-$(LIBFFI_VERSION).dist-info
+232,236c437,442
+< downloads/libffi-$(LIBFFI_VERSION)-$(target).tar.gz:
+< 	@echo ">>> Download libFFI for $(target)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-apple-source-deps/releases/download/libFFI-$(LIBFFI_VERSION)/libffi-$(LIBFFI_VERSION)-$(target).tar.gz
+---
+> $$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h
+> 	@echo ">>> Build libFFI for $(target)"
+> #	mkdir $$(LIBFFI_SRCDIR-$(target))
+> 	cd $$(LIBFFI_SRCDIR-$(target)) && \
+> 		make \
+> 			2>&1 | tee -a ../../libffi-$(LIBFFI_VERSION).build.log
+238,243c444,447
+< $$(LIBFFI_LIB-$(target)): downloads/libffi-$(LIBFFI_VERSION)-$(target).tar.gz
+< 	@echo ">>> Install libFFI for $(target)"
+< 	mkdir -p $$(LIBFFI_INSTALL-$(target))
+< 	cd $$(LIBFFI_INSTALL-$(target)) && tar zxvf $(PROJECT_DIR)/downloads/libffi-$(LIBFFI_VERSION)-$(target).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(LIBFFI_LIB-$(target))
+---
+> $$(LIBFFI_WHEEL-$(target)): $$(LIBFFI_LIB-$(target)) $$(BDIST_WHEEL)
+> 	@echo ">>> Build libFFI wheel for $(target)"
+> 	mkdir -p $$(LIBFFI_WHEEL_DISTINFO-$(target))
+> 	mkdir -p $$(LIBFFI_SRCDIR-$(target))/wheel/opt
+244a449,476
+> 	# Copy distributable content
+> 	cp -r $$(LIBFFI_SRCDIR-$(target))/include $$(LIBFFI_SRCDIR-$(target))/wheel/opt/include
+> 	cp -r $$(LIBFFI_SRCDIR-$(target))/.libs $$(LIBFFI_SRCDIR-$(target))/wheel/opt/lib
+> 
+> 	# Remove dynamic library content
+> 	rm -f $$(LIBFFI_SRCDIR-$(target))/wheel/opt/lib/*.dylib
+> 
+> 	# Copy LICENSE file
+> 	cp $$(LIBFFI_SRCDIR-$(os))/LICENSE $$(LIBFFI_WHEEL_DISTINFO-$(target))
+> 
+> 	# Write package metadata
+> 	echo "Metadata-Version: 1.2" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Name: libffi" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Version: $(LIBFFI_VERSION)" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Summary: " >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/METADATA
+> 	echo "Download-URL: " >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/METADATA
+> 
+> 	# Write wheel metadata
+> 	echo "Wheel-Version: 1.0" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Root-Is-Purelib: false" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Generator: Python-Apple-support.BeeWare" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Build: 1" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/WHEEL
+> 	echo "Tag: $$(WHEEL_TAG-$(target))" >> $$(LIBFFI_WHEEL_DISTINFO-$(target))/WHEEL
+> 
+> 	# Pack the wheel
+> 	mkdir -p wheels/dist/libffi
+> 	$(HOST_PYTHON_EXE) -m wheel pack $$(LIBFFI_SRCDIR-$(target))/wheel --dest-dir wheels/dist/libffi --build-number 1
+> 
+253c485
+< # `build-target` macro. However, the site-customize scripts generated here, per target.
+---
+> # `build-target` macro.
+260c492
+< $$(PYTHON_SRCDIR-$(target))/configure: \
+---
+> $$(PYTHON_SRCDIR-$(target))/Makefile: \
+262,265c494,498
+< 		$$(BZIP2_LIB-$(target)) \
+< 		$$(XZ_LIB-$(target)) \
+< 		$$(OPENSSL_SSL_LIB-$(target)) \
+< 		$$(LIBFFI_LIB-$(target))
+---
+> 		$$(BZIP2_FATLIB-$$(SDK-$(target))) \
+> 		$$(XZ_FATLIB-$$(SDK-$(target))) \
+> 		$$(OPENSSL_FATINCLUDE-$$(SDK-$(target))) $$(OPENSSL_SSL_FATLIB-$$(SDK-$(target))) $$(OPENSSL_CRYPTO_FATLIB-$$(SDK-$(target))) \
+> 		$$(LIBFFI_FATLIB-$$(SDK-$(target))) \
+> 		$$(PYTHON_XCFRAMEWORK-macOS)
+271,278d503
+< 	# Touch the configure script to ensure that Make identifies it as up to date.
+< 	touch $$(PYTHON_SRCDIR-$(target))/configure
+< 
+< $$(PYTHON_SRCDIR-$(target))/Makefile: \
+< 		support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$$(SDK-$(target)))-ar \
+< 		support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(target))-clang \
+< 		support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(target))-cpp \
+< 		$$(PYTHON_SRCDIR-$(target))/configure
+281d505
+< 		PATH="$(PROJECT_DIR)/support/$(PYTHON_VER)/$(os)/bin:$(PATH)" \
+283,286c507,510
+< 			AR=$$(TARGET_TRIPLE-$$(SDK-$(target)))-ar \
+< 			CC=$$(TARGET_TRIPLE-$(target))-clang \
+< 			CPP=$$(TARGET_TRIPLE-$(target))-cpp \
+< 			CXX=$$(TARGET_TRIPLE-$(target))-clang \
+---
+> 			AR="$$(AR-$(target))" \
+> 			CC="$$(CC-$(target))" \
+> 			CPP="$$(CPP-$(target))" \
+> 			CXX="$$(CXX-$(target))" \
+289,294c513,518
+< 			LIBLZMA_CFLAGS="-I$$(XZ_INSTALL-$(target))/include" \
+< 			LIBLZMA_LIBS="-L$$(XZ_INSTALL-$(target))/lib -llzma" \
+< 			BZIP2_CFLAGS="-I$$(BZIP2_INSTALL-$(target))/include" \
+< 			BZIP2_LIBS="-L$$(BZIP2_INSTALL-$(target))/lib -lbz2" \
+< 			LIBFFI_INCLUDEDIR="$$(LIBFFI_INSTALL-$(target))/include" \
+< 			LIBFFI_LIBDIR="$$(LIBFFI_INSTALL-$(target))/lib" \
+---
+> 			LIBLZMA_CFLAGS="-I$$(XZ_MERGE-$$(SDK-$(target)))/include" \
+> 			LIBLZMA_LIBS="-L$$(XZ_MERGE-$$(SDK-$(target)))/lib -llzma" \
+> 			BZIP2_CFLAGS="-I$$(BZIP2_MERGE-$$(SDK-$(target)))/include" \
+> 			BZIP2_LIBS="-L$$(BZIP2_MERGE-$$(SDK-$(target)))/lib -lbz2" \
+> 			LIBFFI_INCLUDEDIR="$$(LIBFFI_MERGE-$$(SDK-$(target)))/include" \
+> 			LIBFFI_LIBDIR="$$(LIBFFI_MERGE-$$(SDK-$(target)))/lib" \
+296c520
+< 			--host=$$(TARGET_TRIPLE-$(target)) \
+---
+> 			--host=$$(TARGET_TRI-$(target)) \
+298c522
+< 			--with-build-python=$(HOST_PYTHON) \
+---
+> 			--with-build-python=$(PROJECT_DIR)/install/macOS/macosx/python-3.11.6/bin/python$(PYTHON_VER) \
+301c525
+< 			--with-openssl="$$(OPENSSL_INSTALL-$(target))" \
+---
+> 			--with-openssl="$$(OPENSSL_MERGE-$$(SDK-$(target)))" \
+311,313c535,536
+< 		PATH="$(PROJECT_DIR)/support/$(PYTHON_VER)/$(os)/bin:$(PATH)" \
+< 			make all \
+< 			2>&1 | tee -a ../python-$(PYTHON_VERSION).build.log
+---
+> 		make all \
+> 		2>&1 | tee -a ../python-$(PYTHON_VERSION).build.log
+318,320c541,542
+< 		PATH="$(PROJECT_DIR)/support/$(PYTHON_VER)/$(os)/bin:$(PATH)" \
+< 			make install \
+< 			2>&1 | tee -a ../python-$(PYTHON_VERSION).install.log
+---
+> 		make install \
+> 		2>&1 | tee -a ../python-$(PYTHON_VERSION).install.log
+324,336d545
+< PYTHON_SITECUSTOMIZE-$(target)=$(PROJECT_DIR)/support/$(PYTHON_VER)/$(os)/platform-site/$(target)/sitecustomize.py
+< 
+< $$(PYTHON_SITECUSTOMIZE-$(target)):
+< 	@echo ">>> Create cross-platform sitecustomize.py for $(target)"
+< 	mkdir -p $$(dir $$(PYTHON_SITECUSTOMIZE-$(target)))
+< 	cat $(PROJECT_DIR)/patch/Python/sitecustomize.$(os).py \
+< 		| sed -e "s/{{os}}/$(os)/g" \
+< 		| sed -e "s/{{arch}}/$$(ARCH-$(target))/g" \
+< 		| sed -e "s/{{tag}}/$$(OS_LOWER-$(target))-$$(VERSION_MIN-$(os))-$$(SDK-$(target))-$$(ARCH-$(target))/g" \
+< 		> $$(PYTHON_SITECUSTOMIZE-$(target))
+< 
+< $(target): $$(PYTHON_SITECUSTOMIZE-$(target)) $$(PYTHON_LIB-$(target))
+< 
+346a556,557
+> 	@echo "CC-$(target): $$(CC-$(target))"
+> 	@echo "CPP-$(target): $$(CPP-$(target))"
+348a560
+> 	@echo "BZIP2_SRCDIR-$(target): $$(BZIP2_SRCDIR-$(target))"
+350a563,565
+> 	@echo "BZIP2_WHEEL-$(target): $$(BZIP2_WHEEL-$(target))"
+> 	@echo "BZIP2_WHEEL_DISTINFO-$(target): $$(BZIP2_WHEEL_DISTINFO-$(target))"
+> 	@echo "XZ_SRCDIR-$(target): $$(XZ_SRCDIR-$(target))"
+352a568,570
+> 	@echo "XZ_WHEEL-$(target): $$(XZ_WHEEL-$(target))"
+> 	@echo "XZ_WHEEL_DISTINFO-$(target): $$(XZ_WHEEL_DISTINFO-$(target))"
+> 	@echo "OPENSSL_SRCDIR-$(target): $$(OPENSSL_SRCDIR-$(target))"
+355c573,576
+< 	@echo "LIBFFI_INSTALL-$(target): $$(LIBFFI_INSTALL-$(target))"
+---
+> 	@echo "OPENSSL_CRYPTO_LIB-$(target): $$(OPENSSL_CRYPTO_LIB-$(target))"
+> 	@echo "OPENSSL_WHEEL-$(target): $$(OPENSSL_WHEEL-$(target))"
+> 	@echo "OPENSSL_WHEEL_DISTINFO-$(target): $$(OPENSSL_WHEEL_DISTINFO-$(target))"
+> 	@echo "LIBFFI_SRCDIR-$(target): $$(LIBFFI_SRCDIR-$(target))"
+356a578,579
+> 	@echo "LIBFFI_WHEEL-$(target): $$(LIBFFI_WHEEL-$(target))"
+> 	@echo "LIBFFI_WHEEL_DISTINFO-$(target): $$(LIBFFI_WHEEL_DISTINFO-$(target))"
+387a611,612
+> CC-$(sdk)=xcrun --sdk $(sdk) clang
+> CPP-$(sdk)=xcrun --sdk $(sdk) clang -E
+392,395d616
+< PYTHON_INSTALL-$(sdk)=$(PROJECT_DIR)/install/$(os)/$(sdk)/python-$(PYTHON_VERSION)
+< PYTHON_LIB-$(sdk)=$$(PYTHON_INSTALL-$(sdk))/lib/libpython$(PYTHON_VER).a
+< PYTHON_INCLUDE-$(sdk)=$$(PYTHON_INSTALL-$(sdk))/include/python$(PYTHON_VER)
+< PYTHON_STDLIB-$(sdk)=$$(PYTHON_INSTALL-$(sdk))/lib/python$(PYTHON_VER)
+397,405c618,619
+< ifeq ($(os),macOS)
+< TARGET_TRIPLE-$(sdk)=apple-darwin
+< else
+< 	ifeq ($$(findstring simulator,$(sdk)),)
+< TARGET_TRIPLE-$(sdk)=apple-$$(OS_LOWER-$(sdk))$$(VERSION_MIN-$(os))
+< 	else
+< TARGET_TRIPLE-$(sdk)=apple-$$(OS_LOWER-$(sdk))$$(VERSION_MIN-$(os))-simulator
+< 	endif
+< endif
+---
+> BZIP2_MERGE-$(sdk)=$(PROJECT_DIR)/merge/$(os)/$(sdk)/bzip2-$(BZIP2_VERSION)
+> BZIP2_FATLIB-$(sdk)=$$(BZIP2_MERGE-$(sdk))/lib/libbz2.a
+407,408c621,622
+< # Expand the build-target macro for target on this OS
+< $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(eval $$(call build-target,$$(target),$(os))))
+---
+> XZ_MERGE-$(sdk)=$(PROJECT_DIR)/merge/$(os)/$(sdk)/xz-$(XZ_VERSION)
+> XZ_FATLIB-$(sdk)=$$(XZ_MERGE-$(sdk))/lib/liblzma.a
+410,412c624,627
+< ###########################################################################
+< # SDK: Aliases
+< ###########################################################################
+---
+> OPENSSL_MERGE-$(sdk)=$(PROJECT_DIR)/merge/$(os)/$(sdk)/openssl-$(OPENSSL_VERSION)
+> OPENSSL_FATINCLUDE-$(sdk)=$$(OPENSSL_MERGE-$(sdk))/include
+> OPENSSL_SSL_FATLIB-$(sdk)=$$(OPENSSL_MERGE-$(sdk))/lib/libssl.a
+> OPENSSL_CRYPTO_FATLIB-$(sdk)=$$(OPENSSL_MERGE-$(sdk))/lib/libcrypto.a
+414,415c629,630
+< support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(sdk))-clang:
+< 	patch/make-xcrun-alias $$@ "--sdk $(sdk) clang"
+---
+> LIBFFI_MERGE-$(sdk)=$(PROJECT_DIR)/merge/$(os)/$(sdk)/libffi-$(LIBFFI_VERSION)
+> LIBFFI_FATLIB-$(sdk)=$$(LIBFFI_MERGE-$(sdk))/lib/libffi.a
+417,418c632,635
+< support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(sdk))-cpp:
+< 	patch/make-xcrun-alias $$@ "--sdk $(sdk) clang -E"
+---
+> PYTHON_MERGE-$(sdk)=$(PROJECT_DIR)/merge/$(os)/$(sdk)/python-$(PYTHON_VERSION)
+> PYTHON_FATLIB-$(sdk)=$$(PYTHON_MERGE-$(sdk))/libPython$(PYTHON_VER).a
+> PYTHON_FATINCLUDE-$(sdk)=$$(PYTHON_MERGE-$(sdk))/Headers
+> PYTHON_FATSTDLIB-$(sdk)=$$(PYTHON_MERGE-$(sdk))/python-stdlib
+420,421c637,638
+< support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(sdk))-ar:
+< 	patch/make-xcrun-alias $$@ "--sdk $(sdk) ar"
+---
+> # Expand the build-target macro for target on this OS
+> $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(eval $$(call build-target,$$(target),$(os))))
+427,428c644,650
+< BZIP2_INSTALL-$(sdk)=$(PROJECT_DIR)/install/$(os)/$(sdk)/bzip2-$(BZIP2_VERSION)
+< BZIP2_LIB-$(sdk)=$$(BZIP2_INSTALL-$(sdk))/lib/libbz2.a
+---
+> $$(BZIP2_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(BZIP2_LIB-$$(target)))
+> 	@echo ">>> Build BZip2 fat library for $(sdk)"
+> 	mkdir -p $$(BZIP2_MERGE-$(sdk))/lib
+> 	lipo -create -output $$@ $$^ \
+> 		2>&1 | tee -a merge/$(os)/$(sdk)/bzip2-$(BZIP2_VERSION).lipo.log
+> 	# Copy headers from the first target associated with the $(sdk) SDK
+> 	cp -r $$(BZIP2_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/include $$(BZIP2_MERGE-$(sdk))
+430,443d651
+< # This is only used on macOS.
+< downloads/bzip2-$(BZIP2_VERSION)-$(sdk).tar.gz:
+< 	@echo ">>> Download BZip2 for $(sdk)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-macOS-source-deps/releases/download/BZip2-$(BZIP2_VERSION)/bzip2-$(BZIP2_VERSION)-$(sdk).tar.gz
+< 
+< $$(BZIP2_LIB-$(sdk)): downloads/bzip2-$(BZIP2_VERSION)-$(sdk).tar.gz
+< 	@echo ">>> Install BZip2 for $(sdk)"
+< 	mkdir -p $$(BZIP2_INSTALL-$(sdk))
+< 	cd $$(BZIP2_INSTALL-$(sdk)) && tar zxvf $(PROJECT_DIR)/downloads/bzip2-$(BZIP2_VERSION)-$(sdk).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(BZIP2_LIB-$(sdk))
+< 
+448,449c656,662
+< XZ_INSTALL-$(sdk)=$(PROJECT_DIR)/install/$(os)/$(sdk)/xz-$(XZ_VERSION)
+< XZ_LIB-$(sdk)=$$(XZ_INSTALL-$(sdk))/lib/liblzma.a
+---
+> $$(XZ_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(XZ_LIB-$$(target)))
+> 	@echo ">>> Build XZ fat library for $(sdk)"
+> 	mkdir -p $$(XZ_MERGE-$(sdk))/lib
+> 	lipo -create -output $$@ $$^ \
+> 		2>&1 | tee -a merge/$(os)/$(sdk)/xz-$(XZ_VERSION).lipo.log
+> 	# Copy headers from the first target associated with the $(sdk) SDK
+> 	cp -r $$(XZ_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/include $$(XZ_MERGE-$(sdk))
+451,464d663
+< # This is only used on macOS.
+< downloads/xz-$(XZ_VERSION)-$(sdk).tar.gz:
+< 	@echo ">>> Download XZ for $(sdk)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-macOS-source-deps/releases/download/XZ-$(XZ_VERSION)/xz-$(XZ_VERSION)-$(sdk).tar.gz
+< 
+< $$(XZ_LIB-$(sdk)): downloads/xz-$(XZ_VERSION)-$(sdk).tar.gz
+< 	@echo ">>> Install XZ for $(sdk)"
+< 	mkdir -p $$(XZ_INSTALL-$(sdk))
+< 	cd $$(XZ_INSTALL-$(sdk)) && tar zxvf $(PROJECT_DIR)/downloads/xz-$(XZ_VERSION)-$(sdk).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(XZ_LIB-$(sdk))
+< 
+469,470c668,671
+< OPENSSL_INSTALL-$(sdk)=$(PROJECT_DIR)/install/$(os)/$(sdk)/openssl-$(OPENSSL_VERSION)
+< OPENSSL_SSL_LIB-$(sdk)=$$(OPENSSL_INSTALL-$(sdk))/lib/libssl.a
+---
+> $$(OPENSSL_FATINCLUDE-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(OPENSSL_SSL_LIB-$$(target)))
+> 	@echo ">>> Copy OpenSSL headers from the first target associated with the SDK"
+> 	mkdir -p $$(OPENSSL_MERGE-$(sdk))
+> 	cp -r $$(OPENSSL_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/include $$(OPENSSL_MERGE-$(sdk))
+472,477c673,678
+< # This is only used on macOS.
+< downloads/openssl-$(OPENSSL_VERSION)-$(sdk).tar.gz:
+< 	@echo ">>> Download OpenSSL for $(sdk)"
+< 	mkdir -p downloads
+< 	curl $(CURL_FLAGS) -o $$@ \
+< 		https://github.com/beeware/cpython-macOS-source-deps/releases/download/OpenSSL-$(OPENSSL_VERSION)/openssl-$(OPENSSL_VERSION)-$(sdk).tar.gz
+---
+> $$(OPENSSL_SSL_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(OPENSSL_SSL_LIB-$$(target)))
+> 	@echo ">>> Build OpenSSL ssl fat library for $(sdk)"
+> 	mkdir -p $$(OPENSSL_MERGE-$(sdk))/lib
+> 	lipo -create -output $$@ \
+> 		$$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(OPENSSL_SSL_LIB-$$(target))) \
+> 		2>&1 | tee -a merge/$(os)/$(sdk)/openssl-$(OPENSSL_VERSION).ssl.lipo.log
+479,484c680,685
+< $$(OPENSSL_SSL_LIB-$(sdk)): downloads/openssl-$(OPENSSL_VERSION)-$(sdk).tar.gz
+< 	@echo ">>> Install OpenSSL for $(sdk)"
+< 	mkdir -p $$(OPENSSL_INSTALL-$(sdk))
+< 	cd $$(OPENSSL_INSTALL-$(sdk)) && tar zxvf $(PROJECT_DIR)/downloads/openssl-$(OPENSSL_VERSION)-$(sdk).tar.gz
+< 	# Ensure the target is marked as clean.
+< 	touch $$(OPENSSL_SSL_LIB-$(sdk))
+---
+> $$(OPENSSL_CRYPTO_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(OPENSSL_CRYPTO_LIB-$$(target)))
+> 	@echo ">>> Build OpenSSL crypto fat library for $(sdk)"
+> 	mkdir -p $$(OPENSSL_MERGE-$(sdk))/lib
+> 	lipo -create -output $$@ \
+> 		$$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(OPENSSL_CRYPTO_LIB-$$(target))) \
+> 		2>&1 | tee -a merge/$(os)/$(sdk)/openssl-$(OPENSSL_VERSION).crypto.lipo.log
+486a688,702
+> # SDK: libFFI
+> ###########################################################################
+> 
+> $$(LIBFFI_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(LIBFFI_LIB-$$(target)))
+> 	@echo ">>> Build libFFI fat library for $(sdk)"
+> 	mkdir -p $$(LIBFFI_MERGE-$(sdk))/lib
+> 	lipo -create -output $$@ $$^ \
+> 		2>&1 | tee -a merge/$(os)/$(sdk)/libffi-$(LIBFFI_VERSION).lipo.log
+> 	# Copy headers from the first target associated with the $(sdk) SDK
+> 	cp -f -r $$(LIBFFI_SRCDIR-$(os))/darwin_common/include \
+> 		$$(LIBFFI_MERGE-$(sdk))
+> 	cp -f -r $$(LIBFFI_SRCDIR-$(os))/darwin_$$(OS_LOWER-$(sdk))/include/* \
+> 		$$(LIBFFI_MERGE-$(sdk))/include
+> 
+> ###########################################################################
+496,500c712,717
+< 
+< $$(PYTHON_SRCDIR-$(sdk))/configure: \
+<  		$$(BZIP2_LIB-$$(sdk)) \
+<  		$$(XZ_LIB-$$(sdk)) \
+<  		$$(OPENSSL_SSL_LIB-$$(sdk)) \
+---
+> PYTHON_INSTALL-$(sdk)=$(PROJECT_DIR)/install/$(os)/$(sdk)/python-$(PYTHON_VERSION)
+> PYTHON_LIB-$(sdk)=$$(PYTHON_INSTALL-$(sdk))/lib/libpython$(PYTHON_VER).a
+> $$(PYTHON_SRCDIR-$(sdk))/Makefile: \
+> 		$$(BZIP2_FATLIB-$$(sdk)) \
+> 		$$(XZ_FATLIB-$$(sdk)) \
+> 		$$(OPENSSL_FATINCLUDE-$$(sdk)) $$(OPENSSL_SSL_FATLIB-$$(sdk)) $$(OPENSSL_CRYPTO_FATLIB-$$(sdk)) \
+507,513d723
+< 	# Touch the configure script to ensure that Make identifies it as up to date.
+< 	touch $$(PYTHON_SRCDIR-$(sdk))/configure
+< 
+< $$(PYTHON_SRCDIR-$(sdk))/Makefile: \
+< 		support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(sdk))-clang \
+< 		support/$(PYTHON_VER)/$(os)/bin/$$(TARGET_TRIPLE-$(sdk))-cpp \
+< 		$$(PYTHON_SRCDIR-$(sdk))/configure
+516d725
+< 		PATH="$(PROJECT_DIR)/support/$(PYTHON_VER)/$(os)/bin:$(PATH)" \
+518,519c727,728
+< 			CC=$$(TARGET_TRIPLE-$(sdk))-clang \
+< 			CPP=$$(TARGET_TRIPLE-$(sdk))-cpp \
+---
+> 			CC="$$(CC-$(sdk))" \
+> 			CPP="$$(CPP-$(sdk))" \
+522,526c731,734
+< 			LIBLZMA_CFLAGS="-I$$(XZ_INSTALL-$(sdk))/include" \
+< 			LIBLZMA_LIBS="-L$$(XZ_INSTALL-$(sdk))/lib -llzma" \
+< 			BZIP2_CFLAGS="-I$$(BZIP2_INSTALL-$(sdk))/include" \
+< 			BZIP2_LIBS="-L$$(BZIP2_INSTALL-$(sdk))/lib -lbz2" \
+< 			MACOSX_DEPLOYMENT_TARGET="$$(VERSION_MIN-$(os))" \
+---
+> 			LIBLZMA_CFLAGS="-I$$(XZ_MERGE-$(sdk))/include" \
+> 			LIBLZMA_LIBS="-L$$(XZ_MERGE-$(sdk))/lib -llzma" \
+> 			BZIP2_CFLAGS="-I$$(BZIP2_MERGE-$(sdk))/include" \
+> 			BZIP2_LIBS="-L$$(BZIP2_MERGE-$(sdk))/lib -lbz2" \
+530c738
+< 			--with-openssl="$$(OPENSSL_INSTALL-$(sdk))" \
+---
+> 			--with-openssl="$$(OPENSSL_MERGE-$(sdk))" \
+535c743,744
+< $$(PYTHON_SRCDIR-$(sdk))/python.exe: $$(PYTHON_SRCDIR-$(sdk))/Makefile
+---
+> $$(PYTHON_SRCDIR-$(sdk))/python.exe: \
+> 		$$(PYTHON_SRCDIR-$(sdk))/Makefile
+538d746
+< 		PATH="$(PROJECT_DIR)/support/$(PYTHON_VER)/$(os)/bin:$(PATH)" \
+542c750
+< $$(PYTHON_LIB-$(sdk)) $$(PYTHON_INCLUDE-$$(sdk))/Python.h $$(PYTHON_STDLIB-$(sdk))/LICENSE.TXT: $$(PYTHON_SRCDIR-$(sdk))/python.exe
+---
+> $(HOST_PYTHON_EXE) $$(PYTHON_LIB-$(sdk)): $$(PYTHON_SRCDIR-$(sdk))/python.exe
+547a756,771
+> $$(PYTHON_FATLIB-$(sdk)): $$(PYTHON_LIB-$(sdk))
+> 	@echo ">>> Build Python fat library for $(sdk)"
+> 	mkdir -p $$(dir $$(PYTHON_FATLIB-$(sdk)))
+> 	# The macosx static library is already fat; copy it as-is
+> 	cp $$(PYTHON_LIB-$(sdk)) $$(PYTHON_FATLIB-$(sdk))
+> 
+> $$(PYTHON_FATINCLUDE-$(sdk)): $$(PYTHON_LIB-$(sdk))
+> 	@echo ">>> Build Python fat library for $(sdk)"
+> 	# The macosx headers are already fat; copy as-is
+> 	cp -r $$(PYTHON_INSTALL-$(sdk))/include/python$(PYTHON_VER) $$(PYTHON_FATINCLUDE-$(sdk))
+> 
+> $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_LIB-$(sdk))
+> 	@echo ">>> Build Python stdlib library for $(sdk)"
+> 	# The macosx stdlib is already fat; copy it as-is
+> 	cp -r $$(PYTHON_INSTALL-$(sdk))/lib/python$(PYTHON_VER) $$(PYTHON_FATSTDLIB-$(sdk))
+> 
+555c779
+< $$(PYTHON_LIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_LIB-$$(target)))
+---
+> $$(PYTHON_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_LIB-$$(target)))
+557c781
+< 	mkdir -p $$(dir $$(PYTHON_LIB-$(sdk)))
+---
+> 	mkdir -p $$(dir $$(PYTHON_FATLIB-$(sdk)))
+559c783
+< 		2>&1 | tee -a install/$(os)/$(sdk)/python-$(PYTHON_VERSION).lipo.log
+---
+> 		2>&1 | tee -a merge/$(os)/$(sdk)/python-$(PYTHON_VERSION).lipo.log
+561c785
+< $$(PYTHON_INCLUDE-$(sdk))/Python.h: $$(PYTHON_LIB-$(sdk))
+---
+> $$(PYTHON_FATINCLUDE-$(sdk)): $$(PYTHON_LIB-$(sdk))
+564,565c788
+< 	mkdir -p $$(shell dirname $$(PYTHON_INCLUDE-$(sdk)))
+< 	cp -r $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/include/python$(PYTHON_VER) $$(PYTHON_INCLUDE-$(sdk))
+---
+> 	cp -r $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/include/python$(PYTHON_VER) $$(PYTHON_FATINCLUDE-$(sdk))
+567c790
+< 	cp $(PROJECT_DIR)/patch/Python/pyconfig-$(os).h $$(PYTHON_INCLUDE-$(sdk))/pyconfig.h
+---
+> 	cp $(PROJECT_DIR)/patch/Python/pyconfig-$(os).h $$(PYTHON_FATINCLUDE-$(sdk))/pyconfig.h
+569c792
+< 	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/include/python$(PYTHON_VER)/pyconfig.h $$(PYTHON_INCLUDE-$(sdk))/pyconfig-$$(ARCH-$$(target)).h; )
+---
+> 	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/include/python$(PYTHON_VER)/pyconfig.h $$(PYTHON_FATINCLUDE-$(sdk))/pyconfig-$$(ARCH-$$(target)).h; )
+571c794,795
+< $$(PYTHON_STDLIB-$(sdk))/LICENSE.TXT: $$(PYTHON_LIB-$(sdk))
+---
+> .PHONY: TEST
+> $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_FATLIB-$(sdk))
+573c797
+< 	mkdir -p $$(PYTHON_STDLIB-$(sdk))/lib-dynload
+---
+> 	mkdir -p $$(PYTHON_FATSTDLIB-$(sdk))
+575c799
+< 	cp -r $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/ $$(PYTHON_STDLIB-$(sdk))
+---
+> 	cp -r $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/ $$(PYTHON_FATSTDLIB-$(sdk))
+578,581c802,805
+< 	rm -rf \
+< 		$$(PYTHON_STDLIB-$(sdk))/_sysconfigdata__*.py \
+< 		$$(PYTHON_STDLIB-$(sdk))/config-* \
+< 		$$(PYTHON_STDLIB-$(sdk))/lib-dynload/*
+---
+> #	rm -rf \
+> #		$$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__*.py \
+> #		$$(PYTHON_FATSTDLIB-$(sdk))/config-* \
+> #		$$(PYTHON_FATSTDLIB-$(sdk))/lib-dynload/*
+582a807,809
+> 	# Copy the cross-target _sysconfigdata module from the patch folder
+> #	cp $(PROJECT_DIR)/patch/Python/_sysconfigdata__$$(OS_LOWER-$(sdk))_$(sdk).py $$(PYTHON_FATSTDLIB-$(sdk))
+> 
+584c811
+< 	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata_* $$(PYTHON_STDLIB-$(sdk))/; )
+---
+> #	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__$$(OS_LOWER-$(sdk))_$(sdk)_$$(ARCH-$$(target)).py; )
+587c814
+< 	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-$(sdk)-$$(ARCH-$$(target)) $$(PYTHON_STDLIB-$(sdk))/; )
+---
+> #	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-iphoneos $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
+590c817
+< 	$$(foreach module,$$(wildcard $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/lib-dynload/*),lipo -create -output $$(PYTHON_STDLIB-$(sdk))/lib-dynload/$$(notdir $$(module)) $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/lib-dynload/$$(notdir $$(module))); )
+---
+> 	$$(foreach module,$$(wildcard $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/lib-dynload/*),lipo -create -output $$(PYTHON_FATSTDLIB-$(sdk))/lib-dynload/$$(notdir $$(module)) $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/lib-dynload/$$(notdir $$(module))); )
+594d820
+< $(sdk): $$(PYTHON_STDLIB-$(sdk))/LICENSE.TXT
+604a831,832
+> 	@echo "CC-$(sdk): $$(CC-$(sdk))"
+> 	@echo "CPP-$(sdk): $$(CPP-$(sdk))"
+606a835,848
+> 	@echo "BZIP2_MERGE-$(sdk): $$(BZIP2_MERGE-$(sdk))"
+> 	@echo "BZIP2_FATLIB-$(sdk): $$(BZIP2_FATLIB-$(sdk))"
+> 	@echo "XZ_MERGE-$(sdk): $$(XZ_MERGE-$(sdk))"
+> 	@echo "XZ_FATLIB-$(sdk): $$(XZ_FATLIB-$(sdk))"
+> 	@echo "OPENSSL_MERGE-$(sdk): $$(OPENSSL_MERGE-$(sdk))"
+> 	@echo "OPENSSL_FATINCLUDE-$(sdk): $$(OPENSSL_FATINCLUDE-$(sdk))"
+> 	@echo "OPENSSL_SSL_FATLIB-$(sdk): $$(OPENSSL_SSL_FATLIB-$(sdk))"
+> 	@echo "OPENSSL_CRYPTO_FATLIB-$(sdk): $$(OPENSSL_CRYPTO_FATLIB-$(sdk))"
+> 	@echo "LIBFFI_MERGE-$(sdk): $$(LIBFFI_MERGE-$(sdk))"
+> 	@echo "LIBFFI_FATLIB-$(sdk): $$(LIBFFI_FATLIB-$(sdk))"
+> 	@echo "PYTHON_MERGE-$(sdk): $$(PYTHON_MERGE-$(sdk))"
+> 	@echo "PYTHON_FATLIB-$(sdk): $$(PYTHON_FATLIB-$(sdk))"
+> 	@echo "PYTHON_FATINCLUDE-$(sdk): $$(PYTHON_FATINCLUDE-$(sdk))"
+> 	@echo "PYTHON_FATSTDLIB-$(sdk): $$(PYTHON_FATSTDLIB-$(sdk))"
+610,611d851
+< 	@echo "PYTHON_INCLUDE-$(sdk): $$(PYTHON_INCLUDE-$(sdk))"
+< 	@echo "PYTHON_STDLIB-$(sdk): $$(PYTHON_STDLIB-$(sdk))"
+634,635c874,875
+< PYTHON_XCFRAMEWORK-$(os)=support/$(PYTHON_VER)/$(os)/Python.xcframework
+< PYTHON_STDLIB-$(os)=support/$(PYTHON_VER)/$(os)/python-stdlib
+---
+> PYTHON_XCFRAMEWORK-$(os)=support/$(os)/Python.xcframework
+> PYTHON_STDLIB-$(os)=support/$(os)/python-stdlib
+640a881,987
+> # Build: BZip2
+> ###########################################################################
+> 
+> BZip2-$(os): $$(foreach sdk,$$(SDKS-$(os)),$$(BZIP2_FATLIB-$$(sdk)))
+> BZip2-wheels-$(os): $$(foreach target,$$(TARGETS-$(os)),$$(BZIP2_WHEEL-$$(target)))
+> 
+> clean-BZip2-$(os):
+> 	@echo ">>> Clean BZip2 build products on $(os)"
+> 	rm -rf \
+> 		build/$(os)/*/bzip2-$(BZIP2_VERSION) \
+> 		build/$(os)/*/bzip2-$(BZIP2_VERSION).*.log \
+> 		install/$(os)/*/bzip2-$(BZIP2_VERSION) \
+> 		install/$(os)/*/bzip2-$(BZIP2_VERSION).*.log \
+> 		merge/$(os)/*/bzip2-$(BZIP2_VERSION) \
+> 		merge/$(os)/*/bzip2-$(BZIP2_VERSION).*.log \
+> 		wheels/dist/bzip2
+> 
+> clean-BZip2-wheels-$(os):
+> 	rm -rf \
+> 		install/$(os)/*/bzip2-$(BZIP2_VERSION)/wheel \
+> 		wheels/dist/bzip2
+> 
+> ###########################################################################
+> # Build: XZ (LZMA)
+> ###########################################################################
+> 
+> XZ-$(os): $$(foreach sdk,$$(SDKS-$(os)),$$(XZ_FATLIB-$$(sdk)))
+> XZ-wheels-$(os): $$(foreach target,$$(TARGETS-$(os)),$$(XZ_WHEEL-$$(target)))
+> 
+> clean-XZ-$(os):
+> 	@echo ">>> Clean XZ build products on $(os)"
+> 	rm -rf \
+> 		build/$(os)/*/xz-$(XZ_VERSION) \
+> 		build/$(os)/*/xz-$(XZ_VERSION).*.log \
+> 		install/$(os)/*/xz-$(XZ_VERSION) \
+> 		install/$(os)/*/xz-$(XZ_VERSION).*.log \
+> 		merge/$(os)/*/xz-$(XZ_VERSION) \
+> 		merge/$(os)/*/xz-$(XZ_VERSION).*.log \
+> 		wheels/dist/xz
+> 
+> clean-XZ-wheels-$(os):
+> 	rm -rf \
+> 		install/$(os)/*/xz-$(XZ_VERSION)/wheel \
+> 		wheels/dist/xz
+> 
+> ###########################################################################
+> # Build: OpenSSL
+> ###########################################################################
+> 
+> OpenSSL-$(os): $$(foreach sdk,$$(SDKS-$(os)),$$(OPENSSL_FATINCLUDE-$$(sdk)) $$(OPENSSL_SSL_FATLIB-$$(sdk)) $$(OPENSSL_CRYPTO_FATLIB-$$(sdk)))
+> OpenSSL-wheels-$(os): $$(foreach target,$$(TARGETS-$(os)),$$(OPENSSL_WHEEL-$$(target)))
+> 
+> clean-OpenSSL-$(os):
+> 	@echo ">>> Clean OpenSSL build products on $(os)"
+> 	rm -rf \
+> 		build/$(os)/*/openssl-$(OPENSSL_VERSION) \
+> 		build/$(os)/*/openssl-$(OPENSSL_VERSION).*.log \
+> 		install/$(os)/*/openssl-$(OPENSSL_VERSION) \
+> 		install/$(os)/*/openssl-$(OPENSSL_VERSION).*.log \
+> 		merge/$(os)/*/openssl-$(OPENSSL_VERSION) \
+> 		merge/$(os)/*/openssl-$(OPENSSL_VERSION).*.log \
+> 		wheels/dist/openssl
+> 
+> clean-OpenSSL-wheels-$(os):
+> 	rm -rf \
+> 		install/$(os)/*/openssl-$(OPENSSL_VERSION)/wheel \
+> 		wheels/dist/openssl
+> 
+> ###########################################################################
+> # Build: libFFI
+> ###########################################################################
+> 
+> # macOS uses the system-provided libFFI, so there's no need to package
+> # a libFFI framework for macOS.
+> ifneq ($(os),macOS)
+> 
+> $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h: downloads/libffi-$(LIBFFI_VERSION).tar.gz $(HOST_PYTHON_EXE)
+> 	@echo ">>> Unpack and configure libFFI sources on $(os)"
+> 	mkdir -p $$(LIBFFI_SRCDIR-$(os))
+> 	tar zxf $$< --strip-components 1 -C $$(LIBFFI_SRCDIR-$(os))
+> 	# Patch the build to add support for new platforms
+> 	cd $$(LIBFFI_SRCDIR-$(os)) && patch -p1 < $(PROJECT_DIR)/patch/libffi-$(LIBFFI_VERSION).patch
+> 	# Configure the build
+> 	cd $$(LIBFFI_SRCDIR-$(os)) && \
+> 		$(PROJECT_DIR)/$(HOST_PYTHON_EXE) generate-darwin-source-and-headers.py
+> 		2>&1 | tee -a ../libffi-$(LIBFFI_VERSION).config.log
+> 
+> endif
+> 
+> libFFI-$(os): $$(foreach sdk,$$(SDKS-$(os)),$$(LIBFFI_FATLIB-$$(sdk)))
+> libFFI-wheels-$(os): $$(foreach target,$$(TARGETS-$(os)),$$(LIBFFI_WHEEL-$$(target)))
+> 
+> clean-libFFI-$(os):
+> 	@echo ">>> Clean libFFI build products on $(os)"
+> 	rm -rf \
+> 		build/$(os)/libffi-$(LIBFFI_VERSION) \
+> 		build/$(os)/libffi-$(LIBFFI_VERSION).*.log \
+> 		merge/$(os)/libffi-$(LIBFFI_VERSION) \
+> 		merge/$(os)/libffi-$(LIBFFI_VERSION).*.log \
+> 		wheels/dist/libffi
+> 
+> clean-libFFI-wheels-$(os):
+> 	rm -rf \
+> 		build/$(os)/libffi-$(LIBFFI_VERSION)/build_*/wheel \
+> 		wheels/dist/libffi
+> 
+> ###########################################################################
+644,645c991,992
+< $$(PYTHON_XCFRAMEWORK-$(os))/Info.plist: \
+< 		$$(foreach sdk,$$(SDKS-$(os)),$$(PYTHON_LIB-$$(sdk)) $$(PYTHON_INCLUDE-$$(sdk))/Python.h)
+---
+> $$(PYTHON_XCFRAMEWORK-$(os)): \
+> 		$$(foreach sdk,$$(SDKS-$(os)),$$(PYTHON_FATLIB-$$(sdk)) $$(PYTHON_FATINCLUDE-$$(sdk)))
+649,650c996,997
+< 		-output $$(PYTHON_XCFRAMEWORK-$(os)) $$(foreach sdk,$$(SDKS-$(os)),-library $$(PYTHON_LIB-$$(sdk)) -headers $$(PYTHON_INCLUDE-$$(sdk))) \
+< 		2>&1 | tee -a support/$(PYTHON_VER)/python-$(os).xcframework.log
+---
+> 		-output $$@ $$(foreach sdk,$$(SDKS-$(os)),-library $$(PYTHON_FATLIB-$$(sdk)) -headers $$(PYTHON_FATINCLUDE-$$(sdk))) \
+> 		2>&1 | tee -a support/python-$(os).xcframework.log
+652,653c999,1001
+< $$(PYTHON_STDLIB-$(os))/VERSIONS: \
+< 		$$(foreach sdk,$$(SDKS-$(os)),$$(PYTHON_STDLIB-$$(sdk))/LICENSE.TXT)
+---
+> $$(PYTHON_STDLIB-$(os)): \
+> 		$$(PYTHON_XCFRAMEWORK-$(os)) \
+> 		$$(foreach sdk,$$(SDKS-$(os)),$$(PYTHON_FATSTDLIB-$$(sdk)))
+656c1004
+< 	cp -r $$(PYTHON_STDLIB-$$(firstword $$(SDKS-$(os)))) $$(PYTHON_STDLIB-$(os))
+---
+> 	cp -r $$(PYTHON_FATSTDLIB-$$(firstword $$(SDKS-$(os)))) $$(PYTHON_STDLIB-$(os))
+664,665c1012,1013
+< 	# Copy the config-* contents from every SDK in $(os) into the support folder.
+< 	$$(foreach sdk,$$(SDKS-$(os)),cp -r $$(PYTHON_STDLIB-$$(sdk))/config-$(PYTHON_VER)-* $$(PYTHON_STDLIB-$(os)); )
+---
+> 	# Copy the config-* contents from every SDK in $(os) into the support folder. No need for Mac Catalyst.
+> #	$$(foreach sdk,$$(SDKS-$(os)),cp -r $$(PYTHON_FATSTDLIB-$$(sdk))/config-$(PYTHON_VER)-* $$(PYTHON_STDLIB-$(os)); )
+668c1016
+< 	$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_STDLIB-$$(sdk))/_sysconfigdata__*.py $$(PYTHON_STDLIB-$(os)); )
+---
+> #	$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_FATSTDLIB-$$(sdk))/_sysconfigdata__*.py $$(PYTHON_STDLIB-$(os)); )
+671c1019
+< 	$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_STDLIB-$$(sdk))/lib-dynload/* $$(PYTHON_STDLIB-$(os))/lib-dynload; )
+---
+> 	$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_FATSTDLIB-$$(sdk))/lib-dynload/* $$(PYTHON_STDLIB-$(os))/lib-dynload; )
+672a1021
+> dist/Python-$(PYTHON_VER)-$(os)-support.$(BUILD_NUMBER).tar.gz: $$(PYTHON_XCFRAMEWORK-$(os)) $$(PYTHON_STDLIB-$(os))
+674,677c1023,1026
+< 	echo "Python version: $(PYTHON_VERSION) " > support/$(PYTHON_VER)/$(os)/VERSIONS
+< 	echo "Build: $(BUILD_NUMBER)" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+< 	echo "Min $(os) version: $$(VERSION_MIN-$(os))" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+< 	echo "---------------------" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+---
+> 	echo "Python version: $(PYTHON_VERSION) " > support/$(os)/VERSIONS
+> 	echo "Build: $(BUILD_NUMBER)" >> support/$(os)/VERSIONS
+> 	echo "Min $(os) version: $$(VERSION_MIN-$(os))" >> support/$(os)/VERSIONS
+> 	echo "---------------------" >> support/$(os)/VERSIONS
+679c1028
+< 	echo "libFFI: built-in" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+---
+> 	echo "libFFI: macOS native" >> support/$(os)/VERSIONS
+681c1030
+< 	echo "libFFI: $(LIBFFI_VERSION)" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+---
+> 	echo "libFFI: $(LIBFFI_VERSION)" >> support/$(os)/VERSIONS
+683,685c1032,1034
+< 	echo "BZip2: $(BZIP2_VERSION)" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+< 	echo "OpenSSL: $(OPENSSL_VERSION)" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+< 	echo "XZ: $(XZ_VERSION)" >> support/$(PYTHON_VER)/$(os)/VERSIONS
+---
+> 	echo "BZip2: $(BZIP2_VERSION)" >> support/$(os)/VERSIONS
+> 	echo "OpenSSL: $(OPENSSL_VERSION)" >> support/$(os)/VERSIONS
+> 	echo "XZ: $(XZ_VERSION)" >> support/$(os)/VERSIONS
+687,690c1036,1043
+< dist/Python-$(PYTHON_VER)-$(os)-support.$(BUILD_NUMBER).tar.gz: \
+< 	$$(PYTHON_XCFRAMEWORK-$(os))/Info.plist \
+< 	$$(PYTHON_STDLIB-$(os))/VERSIONS \
+< 	$$(foreach target,$$(TARGETS-$(os)), $$(PYTHON_SITECUSTOMIZE-$$(target)))
+---
+> ifneq ($(os),macOS)
+> 	@echo ">>> Create cross-platform site sitecustomize.py for $(os)"
+> 	mkdir -p support/$(os)/platform-site
+> 	cat $(PROJECT_DIR)/patch/Python/sitecustomize.py \
+> 		| sed -e "s/{{os}}/$(os)/g" \
+> 		| sed -e "s/{{tag}}/$$(shell echo $(os) | tr '[:upper:]' '[:lower:]')_$$(shell echo $$(VERSION_MIN-$(os)) | sed "s/\./_/g")/g" \
+> 		> support/$(os)/platform-site/sitecustomize.py
+> endif
+695c1048
+< 	tar zcvf dist/Python-$(PYTHON_VER)-$(os)-support.test-$(BUILD_NUMBER).tar.gz -X patch/Python/test.exclude -C support/$(PYTHON_VER)/$(os) `ls -A support/$(PYTHON_VER)/$(os)/`
+---
+> 	tar zcvf dist/Python-$(PYTHON_VER)-$(os)-support.test-$(BUILD_NUMBER).tar.gz -X patch/Python/test.exclude -C support/$(os) `ls -A support/$(os)`
+697c1050
+< 	tar zcvf $$@ -X patch/Python/release.common.exclude -X patch/Python/release.$(os).exclude -C support/$(PYTHON_VER)/$(os) `ls -A support/$(PYTHON_VER)/$(os)/`
+---
+> 	tar zcvf $$@ -X patch/Python/release.common.exclude -X patch/Python/release.$(os).exclude -C support/$(os) `ls -A support/$(os)`
+699c1052,1054
+< clean-$(os):
+---
+> Python-$(os): dist/Python-$(PYTHON_VER)-$(os)-support.$(BUILD_NUMBER).tar.gz
+> 
+> clean-Python-$(os):
+706c1061,1064
+< 		support/$(PYTHON_VER)/$(os) \
+---
+> 		merge/$(os)/*/python-$(PYTHON_VER)* \
+> 		merge/$(os)/*/python-$(PYTHON_VER)*.*.log \
+> 		support/$(os) \
+> 		support/*-$(os).*.log \
+709c1067
+< dev-clean-$(os):
+---
+> dev-clean-Python-$(os):
+716c1074,1077
+< 		support/$(PYTHON_VER)/$(os) \
+---
+> 		merge/$(os)/*/python-$(PYTHON_VERSION) \
+> 		merge/$(os)/*/python-$(PYTHON_VERSION).*.log \
+> 		support/$(os) \
+> 		support/*-$(os).*.log \
+718a1080,1088
+> merge-clean-Python-$(os):
+> 	@echo ">>> Partially clean Python build products on $(os) so that merge modifications can be made"
+> 	rm -rf \
+> 		merge/$(os)/*/python-$(PYTHON_VERSION) \
+> 		merge/$(os)/*/python-$(PYTHON_VERSION).*.log \
+> 		support/$(os) \
+> 		support/*-$(os).*.log \
+> 		dist/Python-$(PYTHON_VER)-$(os)-*
+> 
+723a1094
+> $(os)-wheels: $(foreach dep,$(DEPENDENCIES),$(dep)-wheels-$(os))
+724a1096,1106
+> clean-$(os):
+> 	@echo ">>> Clean $(os) build products"
+> 	rm -rf \
+> 		build/$(os) \
+> 		install/$(os) \
+> 		merge/$(os) \
+> 		dist/Python-$(PYTHON_VER)-$(os)-support.$(BUILD_NUMBER).tar.gz \
+> 		dist/Python-$(PYTHON_VER)-$(os)-support.test-$(BUILD_NUMBER).tar.gz \
+> 
+> clean-wheels-$(os): $(foreach dep,$(DEPENDENCIES),clean-$(dep)-wheels-$(os))
+> 
+731a1114
+> 	@echo "LIBFFI_SRCDIR-$(os): $$(LIBFFI_SRCDIR-$(os))"
+737a1121,1129
+> $(BDIST_WHEEL): $(HOST_PYTHON_EXE)
+> 	@echo ">>> Ensure the macOS python install has pip and wheel"
+> 	$(HOST_PYTHON_EXE) -m ensurepip
+> 	PIP_REQUIRE_VIRTUALENV=false $(HOST_PYTHON_EXE) -m pip install wheel
+> 
+> # Binary support wheels
+> wheels: $(foreach dep,$(DEPENDENCIES),$(dep)-wheels)
+> clean-wheels: $(foreach dep,$(DEPENDENCIES),clean-wheels-$(dep))
+> 
+740,743d1131
+< 	@echo ">>> Environment variables for $(os)"
+< 	@echo "HOST_ARCH: $(HOST_ARCH)"
+< 	@echo "HOST_PYTHON: $(HOST_PYTHON)"
+< 	@echo
+746,747c1134,1137
+< clean: $(foreach os,$(OS_LIST),clean-$(os))
+< dev-clean: $(foreach os,$(OS_LIST),dev-clean-$(os))
+---
+> BZip2: $(foreach os,$(OS_LIST),BZip2-$(os))
+> BZip2-wheels: $(foreach os,$(OS_LIST),BZip2-wheels-$(os))
+> clean-BZip2: $(foreach os,$(OS_LIST),clean-BZip2-$(os))
+> clean-BZip2-wheels: $(foreach os,$(OS_LIST),clean-BZip2-wheels-$(os))
+748a1139,1157
+> XZ: $(foreach os,$(OS_LIST),XZ-$(os))
+> XZ-wheels: $(foreach os,$(OS_LIST),XZ-wheels-$(os))
+> clean-XZ: $(foreach os,$(OS_LIST),clean-XZ-$(os))
+> clean-XZ-wheels: $(foreach os,$(OS_LIST),clean-XZ-wheels-$(os))
+> 
+> OpenSSL: $(foreach os,$(OS_LIST),OpenSSL-$(os))
+> OpenSSL-wheels: $(foreach os,$(OS_LIST),OpenSSL-wheels-$(os))
+> clean-OpenSSL: $(foreach os,$(OS_LIST),clean-OpenSSL-$(os))
+> clean-OpenSSL-wheels: $(foreach os,$(OS_LIST),clean-OpenSSL-wheels-$(os))
+> 
+> libFFI: $(foreach os,$(OS_LIST),libFFI-$(os))
+> libFFI-wheels: $(foreach os,$(OS_LIST),libFFI-wheels-$(os))
+> clean-libFFI: $(foreach os,$(OS_LIST),clean-libFFI-$(os))
+> clean-libFFI-wheels: $(foreach os,$(OS_LIST),clean-libFFI-wheels-$(os))
+> 
+> Python: $(foreach os,$(OS_LIST),Python-$(os))
+> clean-Python: $(foreach os,$(OS_LIST),clean-Python-$(os))
+> dev-clean-Python: $(foreach os,$(OS_LIST),dev-clean-Python-$(os))
+> 
