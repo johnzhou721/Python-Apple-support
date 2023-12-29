@@ -15,3 +15,4 @@ tests/testbed/iOS
 *.log
 *.gz
 *.DS_Store
+merge
