@@ -159,6 +159,19 @@ will also need to enable the "Disable Library Validation" entitlement under
 If you have any third party dependencies with binary components, they'll also need to go
 through the processing of the scripts in steps 6 and 7.
 
+
+### Alternate Approach for Steps 6 & 7
+
+An alternative approach would be to use the XCFramework template under ``framework-template``, and change:
+- In the "root" ``Info.Plist``, change the module name, using find and replace. The binary path might be wrong but it does not matter in embedding.
+- In each of the "subframeworks" ``Info.plist``, change the binary name there.
+- Rename the sub-frameworks to 1) stay consistent with change #1 and 2) get Python to find the correct path.
+- Change up the files, use the correct simulator / actual thing.
+
+Then, add your XCFramework to a Copy Files build phrase. Change the destination to ``Frameworks``, and drag in the XCFrameworks. Let Xcode and the patched version of Python do the rest!!!
+
+For macOS or macOS Catalyst builds, you can directly drag in all of the dylibs.
+
 ## Accessing the Python runtime
 
 There are 2 ways to access the Python runtime in your project code.

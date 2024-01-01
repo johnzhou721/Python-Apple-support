@@ -29,7 +29,7 @@ OPENSSL_VERSION=3.1.0
 # OPENSSL_REVISION=q
 # OPENSSL_VERSION=$(OPENSSL_VERSION_NUMBER)$(OPENSSL_REVISION)
 
-LIBFFI_VERSION=3.4.4
+LIBFFI_VERSION=3.4.2
 
 # Supported OS and dependencies
 DEPENDENCIES=BZip2 XZ OpenSSL libFFI
@@ -51,7 +51,7 @@ BDIST_WHEEL=$(HOST_PYTHON)/lib/python$(PYTHON_VER)/site-packages/wheel/bdist_whe
 # Force the path to be minimal. This ensures that anything in the user environment
 # (in particular, homebrew and user-provided Python installs) aren't inadvertently
 # linked into the support package.
-PATH=/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin
+PATH=/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:$(PROJECT_DIR)/alias/
 
 # Build for all operating systems
 all: $(OS_LIST)
@@ -179,12 +179,30 @@ TARGET_TRI-$(target)=arm64-apple-ios14.0
 endif
 
 SDK_ROOT-$(target)=$$(shell xcrun --sdk $$(SDK-$(target)) --show-sdk-path)
-CC-$(target)=xcrun --sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))
-CPP-$(target)=xcrun --sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target)) -E
-CXX-$(target)=xcrun --sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))
-AR-$(target)=xcrun --sdk $$(SDK-$(target)) ar
+CC-$(target)=cc-$(target)
+CPP-$(target)=cpp-$(target)
+CXX-$(target)=cxx-$(target)
+AR-$(target)=ar-$(target)
 CFLAGS-$(target)=$$(CFLAGS-$(os))
 LDFLAGS-$(target)=$$(CFLAGS-$(os))
+
+
+# Aliases
+.PHONY: alias-$(target)
+
+alias-$(target):
+	-mkdir alias
+	-$(PROJECT_DIR)/patch/make-xcrun-alias $(PROJECT_DIR)/alias/cc-$(target) \
+		"--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))"
+	-$(PROJECT_DIR)/patch/make-xcrun-alias $(PROJECT_DIR)/alias/cpp-$(target) \
+		"--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target)) -E"
+	-$(PROJECT_DIR)/patch/make-xcrun-alias $(PROJECT_DIR)/alias/cxx-$(target) \
+		"--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))"
+	-$(PROJECT_DIR)/patch/make-xcrun-alias $(PROJECT_DIR)/alias/ar-$(target) \
+		"--sdk $$(SDK-$(target)) ar"
+	@echo $(PATH)
+	
+
 
 ###########################################################################
 # Target: BZip2
@@ -196,7 +214,7 @@ BZIP2_LIB-$(target)=$$(BZIP2_INSTALL-$(target))/lib/libbz2.a
 BZIP2_WHEEL-$(target)=wheels/dist/bzip2/bzip2-$(BZIP2_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 BZIP2_WHEEL_DISTINFO-$(target)=$$(BZIP2_INSTALL-$(target))/wheel/bzip2-$(BZIP2_VERSION).dist-info
 
-$$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz
+$$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz alias-$(target)
 	@echo ">>> Unpack BZip2 sources for $(target)"
 	mkdir -p $$(BZIP2_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(BZIP2_SRCDIR-$(target))
@@ -253,7 +271,7 @@ XZ_LIB-$(target)=$$(XZ_INSTALL-$(target))/lib/liblzma.a
 XZ_WHEEL-$(target)=wheels/dist/xz/xz-$(XZ_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 XZ_WHEEL_DISTINFO-$(target)=$$(XZ_INSTALL-$(target))/wheel/xz-$(XZ_VERSION).dist-info
 
-$$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz
+$$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz alias-$(target)
 	@echo ">>> Unpack XZ sources for $(target)"
 	mkdir -p $$(XZ_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(XZ_SRCDIR-$(target))
@@ -319,7 +337,7 @@ OPENSSL_CRYPTO_LIB-$(target)=$$(OPENSSL_INSTALL-$(target))/lib/libcrypto.a
 OPENSSL_WHEEL-$(target)=wheels/dist/openssl/openssl-$(OPENSSL_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 OPENSSL_WHEEL_DISTINFO-$(target)=$$(OPENSSL_INSTALL-$(target))/wheel/openssl-$(OPENSSL_VERSION).dist-info
 
-$$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz
+$$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz alias-$(target)
 	@echo ">>> Unpack and configure OpenSSL sources for $(target)"
 	mkdir -p $$(OPENSSL_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(OPENSSL_SRCDIR-$(target))
@@ -434,7 +452,7 @@ LIBFFI_LIB-$(target)=$$(LIBFFI_SRCDIR-$(target))/.libs/libffi.a
 LIBFFI_WHEEL-$(target)=wheels/dist/libffi/libffi-$(LIBFFI_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 LIBFFI_WHEEL_DISTINFO-$(target)=$$(LIBFFI_SRCDIR-$(target))/wheel/libffi-$(LIBFFI_VERSION).dist-info
 
-$$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h
+$$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h alias-$(target)
 	@echo ">>> Build libFFI for $(target)"
 #	mkdir $$(LIBFFI_SRCDIR-$(target))
 	cd $$(LIBFFI_SRCDIR-$(target)) && \
@@ -489,13 +507,24 @@ PYTHON_SRCDIR-$(target)=build/$(os)/$(target)/python-$(PYTHON_VERSION)
 PYTHON_INSTALL-$(target)=$(PROJECT_DIR)/install/$(os)/$(target)/python-$(PYTHON_VERSION)
 PYTHON_LIB-$(target)=$$(PYTHON_INSTALL-$(target))/lib/libpython$(PYTHON_VER).a
 
+LIBFFI_DIR-$(os)=$(PROJECT_DIR)/merge/$(os)/macosx/libffi-$(LIBFFI_VERSION)
+
+.PHONY: TEST
+TEST-$(target):
+	cd $$(LIBFFI_DIR-$(os))
+	cd $$(LIBFFI_DIR-$(os))/include
+	cd $$(LIBFFI_DIR-$(os))/lib
+	@echo $$(PYTHON_SRCDIR-$(target))/Makefile
+	
+	
 $$(PYTHON_SRCDIR-$(target))/Makefile: \
 		downloads/Python-$(PYTHON_VERSION).tar.gz \
 		$$(BZIP2_FATLIB-$$(SDK-$(target))) \
 		$$(XZ_FATLIB-$$(SDK-$(target))) \
 		$$(OPENSSL_FATINCLUDE-$$(SDK-$(target))) $$(OPENSSL_SSL_FATLIB-$$(SDK-$(target))) $$(OPENSSL_CRYPTO_FATLIB-$$(SDK-$(target))) \
 		$$(LIBFFI_FATLIB-$$(SDK-$(target))) \
-		$$(PYTHON_XCFRAMEWORK-macOS)
+		$$(PYTHON_XCFRAMEWORK-macOS) \
+		alias-$(target)
 	@echo ">>> Unpack and configure Python for $(target)"
 	mkdir -p $$(PYTHON_SRCDIR-$(target))
 	tar zxf downloads/Python-$(PYTHON_VERSION).tar.gz --strip-components 1 -C $$(PYTHON_SRCDIR-$(target))
@@ -514,9 +543,11 @@ $$(PYTHON_SRCDIR-$(target))/Makefile: \
 			LIBLZMA_LIBS="-L$$(XZ_MERGE-$$(SDK-$(target)))/lib -llzma" \
 			BZIP2_CFLAGS="-I$$(BZIP2_MERGE-$$(SDK-$(target)))/include" \
 			BZIP2_LIBS="-L$$(BZIP2_MERGE-$$(SDK-$(target)))/lib -lbz2" \
-			LIBFFI_INCLUDEDIR="$$(LIBFFI_MERGE-$$(SDK-$(target)))/include" \
-			LIBFFI_LIBDIR="$$(LIBFFI_MERGE-$$(SDK-$(target)))/lib" \
+			LIBFFI_INCLUDEDIR="$$(LIBFFI_DIR-$(os))/include" \
+			LIBFFI_LIBDIR="$$(LIBFFI_DIR-$(os))/lib" \
 			LIBFFI_LIB="ffi" \
+			LIBFFI_CFLAGS="-I$$(LIBFFI_DIR-$(os))/include" \
+			LIBFFI_LDFLAGS="-L$$(LIBFFI_DIR-$(os))/lib -lffi" \
 			--host=$$(TARGET_TRI-$(target)) \
 			--build=$(HOST_ARCH)-apple-darwin \
 			--with-build-python=$(PROJECT_DIR)/install/macOS/macosx/python-3.13.0a1/bin/python$(PYTHON_VER) \
@@ -528,7 +559,6 @@ $$(PYTHON_SRCDIR-$(target))/Makefile: \
 			ac_cv_file__dev_ptc=no \
 			$$(PYTHON_CONFIGURE-$(os)) \
 			2>&1 | tee -a ../python-$(PYTHON_VERSION).config.log
-
 $$(PYTHON_SRCDIR-$(target))/python.exe: $$(PYTHON_SRCDIR-$(target))/Makefile
 	@echo ">>> Build Python for $(target)"
 	cd $$(PYTHON_SRCDIR-$(target)) && \
@@ -688,6 +718,7 @@ $$(OPENSSL_CRYPTO_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(OP
 # SDK: libFFI
 ###########################################################################
 
+LIBFFI_INCLUDEDIR=$$(LIBFFI_MERGE-$$(sdk))/include
 $$(LIBFFI_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(LIBFFI_LIB-$$(target)))
 	@echo ">>> Build libFFI fat library for $(sdk)"
 	mkdir -p $$(LIBFFI_MERGE-$(sdk))/lib
@@ -698,6 +729,11 @@ $$(LIBFFI_FATLIB-$(sdk)): $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(LIBFFI_LIB
 		$$(LIBFFI_MERGE-$(sdk))
 	cp -f -r $$(LIBFFI_SRCDIR-$(os))/darwin_$$(OS_LOWER-$(sdk))/include/* \
 		$$(LIBFFI_MERGE-$(sdk))/include
+	
+	# Add additional arch so it will not fail.
+	cp $$(LIBFFI_INCLUDEDIR)/ffi_arm64.h $$(LIBFFI_INCLUDEDIR)/ffi_arm64_32.h
+	cp $$(LIBFFI_INCLUDEDIR)/fficonfig_arm64.h $$(LIBFFI_INCLUDEDIR)/fficonfig_arm64_32.h
+	cp $$(LIBFFI_INCLUDEDIR)/ffitarget_arm64.h $$(LIBFFI_INCLUDEDIR)/ffitarget_arm64_32.h
 
 ###########################################################################
 # SDK: Python
@@ -818,7 +854,8 @@ $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_FATLIB-$(sdk))
 	
 	# Ship our own files specially for Catalyst.
 	cp patch/_sysconfigdata__ios_iphoneos-arm64.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__ios_iphoneos-arm64.py
-	cp patch/_sysconfigdata__ios_iphoneos-x86_64.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__ios_iphoneos-x86_64.py
+	cp patch/arm64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/arm64_sysconfigdata__ios_iphoneos.py
+	cp patch/x86_64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/x86_64_sysconfigdata__ios_iphoneos.py
 
 	# Merge the binary modules from each target in the $(sdk) SDK into a single binary
 	$$(foreach module,$$(wildcard $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/lib-dynload/*),lipo -create -output $$(PYTHON_FATSTDLIB-$(sdk))/lib-dynload/$$(notdir $$(module)) $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/lib-dynload/$$(notdir $$(module))); )
@@ -1050,6 +1087,7 @@ ifneq ($(os),macOS)
 endif
 
 	@echo ">>> Create final distribution artefact for $(os)"
+	cp -r alias support/$(os)/bin
 	mkdir -p dist
 	# Build a "full" tarball with all content for test purposes
 	tar zcvf dist/Python-$(PYTHON_VER)-$(os)-support.test-$(BUILD_NUMBER).tar.gz -X patch/Python/test.exclude -C support/$(os) `ls -A support/$(os)`
