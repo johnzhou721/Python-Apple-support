@@ -5,6 +5,7 @@
 # - iOS             - build everything for iOS
 # - tvOS            - build everything for tvOS
 # - watchOS         - build everything for watchOS
+# - macCatalyst 	- build for Mac Catalyst
 
 # Current directory
 PROJECT_DIR=$(shell pwd)
@@ -66,7 +67,7 @@ HOST_PYTHON=$(shell which python$(PYTHON_VER))
 PATH=/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin
 
 # Build for all operating systems
-all: $(OS_LIST)
+all: $(OS_LIST) macCatalyst
 
 .PHONY: \
 	all clean distclean update-patch vars \
@@ -77,6 +78,13 @@ all: $(OS_LIST)
 # Full clean - includes all downloaded products
 distclean: clean
 	rm -rf downloads build dist install support
+
+macCatalyst:
+	$(MAKE) -C macios
+	-mkdir support/macios
+	cp -r macios/support/* support/macios
+	-mkdir dist/macios
+	cp -r macios/dist/* dist/macios
 
 update-patch:
 	# Generate a diff from the clone of the python/cpython Github repository,
@@ -282,8 +290,9 @@ $$(PYTHON_SRCDIR-$(target))/Makefile: \
 			LIBLZMA_LIBS="-L$$(XZ_INSTALL-$(target))/lib -llzma" \
 			BZIP2_CFLAGS="-I$$(BZIP2_INSTALL-$(target))/include" \
 			BZIP2_LIBS="-L$$(BZIP2_INSTALL-$(target))/lib -lbz2" \
-			LIBFFI_CFLAGS="-I$$(LIBFFI_INSTALL-$(target))/include" \
-			LIBFFI_LIBS="-L$$(LIBFFI_INSTALL-$(target))/lib -lffi" \
+			LIBFFI_INCLUDEDIR="$$(LIBFFI_INSTALL-$(target))/include" \
+			LIBFFI_LIBDIR="$$(LIBFFI_INSTALL-$(target))/lib" \
+			LIBFFI_LIB="ffi" \
 			--host=$$(TARGET_TRIPLE-$(target)) \
 			--build=$(HOST_ARCH)-apple-darwin \
 			--with-build-python=$(HOST_PYTHON) \

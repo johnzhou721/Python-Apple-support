@@ -4,31 +4,36 @@ build_time_vars = {'ABIFLAGS': '',
  'AIX_BUILDDATE': 0,
  'AIX_GENUINE_CPLUSPLUS': 0,
  'ALIGNOF_LONG': 8,
+ 'ALIGNOF_MAX_ALIGN_T': 8,
  'ALIGNOF_SIZE_T': 8,
  'ALT_SOABI': 0,
  'ANDROID_API_LEVEL': 0,
- 'AR': 'xcrun --sdk macosx ar',
+ 'AR': 'ar-macosx.arm64',
  'ARFLAGS': 'rcs',
- 'BASECFLAGS': '-Wsign-compare -Wunreachable-code',
+ 'BASECFLAGS': '-fno-strict-overflow -Wsign-compare -Wunreachable-code',
  'BASECPPFLAGS': '',
  'BASEMODLIBS': '',
- 'BINDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/bin',
- 'BINLIBDEST': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13',
- 'BLDLIBRARY': 'libpython3.13.a',
- 'BLDSHARED': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi '
-              '-bundle -undefined dynamic_lookup -mios-version-min=14.0',
+ 'BINDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/bin',
+ 'BINLIBDEST': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12',
+ 'BLDLIBRARY': 'libpython3.12.a',
+ 'BLDSHARED': 'cc-macosx.arm64 -dynamiclib -undefined dynamic_lookup '
+              '-mios-version-min=14.0',
  'BOOTSTRAP_HEADERS': '\\',
  'BUILDEXE': '.exe',
  'BUILDPYTHON': 'python.exe',
  'BUILD_GNU_TYPE': 'aarch64-apple-darwin',
+ 'BUILD_SCRIPTS_DIR': 'build/scripts-3.12',
  'BYTESTR_DEPS': '\\',
- 'CC': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi',
+ 'CC': 'cc-macosx.arm64',
  'CCSHARED': '',
- 'CFLAGS': '-Wsign-compare -Wunreachable-code -DNDEBUG -g -fwrapv -O3 -Wall '
-           '-mios-version-min=14.0',
+ 'CFLAGS': '-fno-strict-overflow -Wsign-compare -Wunreachable-code -DNDEBUG -g '
+           '-O3 -Wall -mios-version-min=14.0',
  'CFLAGSFORSHARED': '',
  'CFLAGS_ALIASING': '-fno-strict-aliasing',
  'CFLAGS_NODIST': '',
+ 'CODECS_COMMON_HEADERS': './Modules/cjkcodecs/multibytecodec.h '
+                          './Modules/cjkcodecs/cjkcodecs.h',
+ 'COMPILEALL_OPTS': '-j0',
  'CONFIGFILES': 'configure configure.ac acconfig.h pyconfig.h.in '
                 'Makefile.pre.in',
  'CONFIGURE_CFLAGS': '-mios-version-min=14.0',
@@ -41,10 +46,8 @@ build_time_vars = {'ABIFLAGS': '',
  'CONFIGURE_LDFLAGS': '-mios-version-min=14.0',
  'CONFIGURE_LDFLAGS_NODIST': '',
  'CONFIGURE_LDFLAGS_NOLTO': '',
- 'CONFIG_ARGS': "'AR=xcrun --sdk macosx ar' 'CC=xcrun --sdk macosx clang "
-                "-target x86_64-apple-ios14.0-macabi' 'CPP=xcrun --sdk macosx "
-                "clang -target x86_64-apple-ios14.0-macabi -E' 'CXX=xcrun "
-                "--sdk macosx clang -target x86_64-apple-ios14.0-macabi' "
+ 'CONFIG_ARGS': "'AR=ar-macosx.arm64' 'CC=cc-macosx.arm64' "
+                "'CPP=cpp-macosx.arm64' 'CXX=cxx-macosx.arm64' "
                 "'CFLAGS=-mios-version-min=14.0' "
                 "'LDFLAGS=-mios-version-min=14.0' "
                 "'LIBLZMA_CFLAGS=-I/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/xz-5.4.2/include' "
@@ -55,40 +58,37 @@ build_time_vars = {'ABIFLAGS': '',
                 "-lbz2' "
                 "'LIBFFI_INCLUDEDIR=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/libffi-3.4.2/include' "
                 "'LIBFFI_LIBDIR=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/libffi-3.4.2/lib' "
-                "'LIBFFI_LIB=ffi' '--host=x86_64-apple-ios14.0' "
+                "'LIBFFI_LIB=ffi' '--host=arm64-apple-ios14.0' "
                 "'--build=arm64-apple-darwin' "
-                "'--with-build-python=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13' "
-                "'--prefix=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1' "
+                "'--with-build-python=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12' "
+                "'--prefix=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0' "
                 "'--enable-ipv6' "
                 "'--with-openssl=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/openssl-3.1.0' "
                 "'--without-ensurepip' 'ac_cv_file__dev_ptmx=no' "
                 "'ac_cv_file__dev_ptc=no' 'build_alias=arm64-apple-darwin' "
-                "'host_alias=x86_64-apple-ios14.0'",
- 'CONFINCLUDEDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include',
- 'CONFINCLUDEPY': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include/python3.13',
+                "'host_alias=arm64-apple-ios14.0'",
+ 'CONFINCLUDEDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include',
+ 'CONFINCLUDEPY': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include/python3.12',
  'COREPYTHONPATH': '',
- 'COVERAGE_INFO': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1/coverage.info',
+ 'COVERAGE_INFO': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0/coverage.info',
  'COVERAGE_LCOV_OPTIONS': '--rc lcov_branch_coverage=1',
- 'COVERAGE_REPORT': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1/lcov-report',
+ 'COVERAGE_REPORT': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0/lcov-report',
  'COVERAGE_REPORT_OPTIONS': '--rc lcov_branch_coverage=1 --branch-coverage '
-                            '--title "CPython 3.13 LCOV report [commit $(shell '
+                            '--title "CPython 3.12 LCOV report [commit $(shell '
                             ')]"',
  'CPPFLAGS': '-I. -I./Include',
- 'CXX': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi',
- 'DECIMAL_CFLAGS': '-I./Modules/_decimal/libmpdec -DCONFIG_64=1 -DANSI=1 '
-                   '-DHAVE_UINT128_T=1',
- 'DECIMAL_LDFLAGS': '-lm Modules/_decimal/libmpdec/libmpdec.a',
+ 'CXX': 'cxx-macosx.arm64',
  'DEEPFREEZE_C': 'Python/deepfreeze/deepfreeze.c',
- 'DEEPFREEZE_DEPS': './Tools/scripts/deepfreeze.py '
-                    './Programs/_freeze_module.py \\',
+ 'DEEPFREEZE_DEPS': './Tools/build/deepfreeze.py ./Programs/_freeze_module.py '
+                    '\\',
  'DEEPFREEZE_OBJS': 'Python/deepfreeze/deepfreeze.o',
- 'DESTDIRS': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1 '
-             '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib '
-             '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13 '
-             '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13/lib-dynload',
- 'DESTLIB': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13',
+ 'DESTDIRS': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0 '
+             '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib '
+             '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12 '
+             '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12/lib-dynload',
+ 'DESTLIB': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12',
  'DESTPATH': '',
- 'DESTSHARED': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13/lib-dynload',
+ 'DESTSHARED': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12/lib-dynload',
  'DFLAGS': '',
  'DIRMODE': 755,
  'DIST': 'README.rst ChangeLog configure configure.ac acconfig.h pyconfig.h.in '
@@ -101,6 +101,8 @@ build_time_vars = {'ABIFLAGS': '',
  'DOUBLE_IS_ARM_MIXED_ENDIAN_IEEE754': 0,
  'DOUBLE_IS_BIG_ENDIAN_IEEE754': 0,
  'DOUBLE_IS_LITTLE_ENDIAN_IEEE754': 1,
+ 'DSYMUTIL': '',
+ 'DSYMUTIL_PATH': '',
  'DTRACE': '',
  'DTRACE_DEPS': '\\',
  'DTRACE_HEADERS': '',
@@ -110,18 +112,17 @@ build_time_vars = {'ABIFLAGS': '',
  'ENSUREPIP': 'no',
  'EXE': '',
  'EXEMODE': 755,
- 'EXPAT_CFLAGS': '-I./Modules/expat',
- 'EXPAT_LDFLAGS': '-lm Modules/expat/libexpat.a',
+ 'EXENAME': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/bin/python3.12',
  'EXPORTSFROM': '',
  'EXPORTSYMS': '',
  'EXTRATESTOPTS': '',
  'EXTRA_CFLAGS': '',
- 'EXT_SUFFIX': '.cpython-311-iphoneos.so',
+ 'EXT_SUFFIX': '.cpython-312-iphoneos.dylib',
  'FILEMODE': 644,
  'FLOAT_WORDS_BIGENDIAN': 0,
- 'FREEZE_MODULE': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13 '
+ 'FREEZE_MODULE': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12 '
                   './Programs/_freeze_module.py',
- 'FREEZE_MODULE_BOOTSTRAP': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13 '
+ 'FREEZE_MODULE_BOOTSTRAP': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12 '
                             './Programs/_freeze_module.py',
  'FREEZE_MODULE_BOOTSTRAP_DEPS': './Programs/_freeze_module.py',
  'FREEZE_MODULE_DEPS': './Programs/_freeze_module.py',
@@ -212,6 +213,7 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_DUP3': 0,
  'HAVE_DYLD_SHARED_CACHE_CONTAINS_PATH': 1,
  'HAVE_DYNAMIC_LOADING': 1,
+ 'HAVE_EDITLINE_READLINE_H': 0,
  'HAVE_ENDIAN_H': 0,
  'HAVE_EPOLL': 0,
  'HAVE_EPOLL_CREATE1': 0,
@@ -234,6 +236,9 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_FDOPENDIR': 1,
  'HAVE_FDWALK': 0,
  'HAVE_FEXECVE': 0,
+ 'HAVE_FFI_CLOSURE_ALLOC': 0,
+ 'HAVE_FFI_PREP_CIF_VAR': 0,
+ 'HAVE_FFI_PREP_CLOSURE_LOC': 0,
  'HAVE_FLOCK': 1,
  'HAVE_FORK': 1,
  'HAVE_FORK1': 0,
@@ -253,8 +258,8 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_FUTIMESAT': 0,
  'HAVE_GAI_STRERROR': 1,
  'HAVE_GCC_ASM_FOR_MC68881': 0,
- 'HAVE_GCC_ASM_FOR_X64': 1,
- 'HAVE_GCC_ASM_FOR_X87': 1,
+ 'HAVE_GCC_ASM_FOR_X64': 0,
+ 'HAVE_GCC_ASM_FOR_X87': 0,
  'HAVE_GCC_UINT128_T': 1,
  'HAVE_GDBM_DASH_NDBM_H': 0,
  'HAVE_GDBM_H': 0,
@@ -331,11 +336,8 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_LIBDB': 0,
  'HAVE_LIBDL': 1,
  'HAVE_LIBDLD': 0,
- 'HAVE_LIBGDBM_COMPAT': 0,
  'HAVE_LIBIEEE': 0,
  'HAVE_LIBINTL_H': 0,
- 'HAVE_LIBNDBM': 0,
- 'HAVE_LIBREADLINE': 1,
  'HAVE_LIBRESOLV': 0,
  'HAVE_LIBSENDFILE': 0,
  'HAVE_LIBSQLITE3': 1,
@@ -349,6 +351,7 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_LINUX_CAN_RAW_FD_FRAMES': 0,
  'HAVE_LINUX_CAN_RAW_H': 0,
  'HAVE_LINUX_CAN_RAW_JOIN_FILTERS': 0,
+ 'HAVE_LINUX_FS_H': 0,
  'HAVE_LINUX_LIMITS_H': 0,
  'HAVE_LINUX_MEMFD_H': 0,
  'HAVE_LINUX_NETLINK_H': 0,
@@ -371,8 +374,8 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_MAKEDEV': 1,
  'HAVE_MBRTOWC': 1,
  'HAVE_MEMFD_CREATE': 0,
- 'HAVE_MEMORY_H': 1,
  'HAVE_MEMRCHR': 0,
+ 'HAVE_MINIX_CONFIG_H': 0,
  'HAVE_MKDIRAT': 1,
  'HAVE_MKFIFO': 1,
  'HAVE_MKFIFOAT': 1,
@@ -382,6 +385,7 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_MMAP': 1,
  'HAVE_MREMAP': 0,
  'HAVE_NANOSLEEP': 1,
+ 'HAVE_NCURSESW': 0,
  'HAVE_NCURSES_H': 1,
  'HAVE_NDBM_H': 1,
  'HAVE_NDIR_H': 0,
@@ -389,12 +393,14 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_NETDB_H': 1,
  'HAVE_NETINET_IN_H': 1,
  'HAVE_NETPACKET_PACKET_H': 0,
+ 'HAVE_NET_ETHERNET_H': 1,
  'HAVE_NET_IF_H': 1,
  'HAVE_NICE': 1,
  'HAVE_NON_UNICODE_WCHAR_T_REPRESENTATION': 0,
  'HAVE_OPENAT': 1,
  'HAVE_OPENDIR': 1,
  'HAVE_OPENPTY': 1,
+ 'HAVE_PANEL_H': 1,
  'HAVE_PATHCONF': 1,
  'HAVE_PAUSE': 1,
  'HAVE_PIPE': 1,
@@ -424,6 +430,7 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_PWRITE': 1,
  'HAVE_PWRITEV': 1,
  'HAVE_PWRITEV2': 0,
+ 'HAVE_READLINE_READLINE_H': 1,
  'HAVE_READLINK': 1,
  'HAVE_READLINKAT': 1,
  'HAVE_READV': 1,
@@ -461,6 +468,7 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_SETITIMER': 1,
  'HAVE_SETJMP_H': 1,
  'HAVE_SETLOCALE': 1,
+ 'HAVE_SETNS': 0,
  'HAVE_SETPGID': 1,
  'HAVE_SETPGRP': 1,
  'HAVE_SETPRIORITY': 1,
@@ -499,8 +507,8 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_STATVFS': 1,
  'HAVE_STAT_TV_NSEC': 0,
  'HAVE_STAT_TV_NSEC2': 1,
- 'HAVE_STDARG_PROTOTYPES': 1,
  'HAVE_STDINT_H': 1,
+ 'HAVE_STDIO_H': 1,
  'HAVE_STDLIB_H': 1,
  'HAVE_STD_ATOMIC': 1,
  'HAVE_STRFTIME': 1,
@@ -584,6 +592,7 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_UNAME': 1,
  'HAVE_UNISTD_H': 1,
  'HAVE_UNLINKAT': 1,
+ 'HAVE_UNSHARE': 0,
  'HAVE_USABLE_WCHAR_T': 0,
  'HAVE_UTIL_H': 1,
  'HAVE_UTIMENSAT': 1,
@@ -612,92 +621,110 @@ build_time_vars = {'ABIFLAGS': '',
  'HAVE_ZLIB_H': 1,
  'HAVE__GETPTY': 0,
  'HOSTRUNNER': '',
- 'HOST_GNU_TYPE': 'x86_64-apple-ios14.0',
- 'INCLDIRSTOMAKE': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include '
-                   '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include '
-                   '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include/python3.13 '
-                   '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include/python3.13',
- 'INCLUDEDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include',
- 'INCLUDEPY': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/include/python3.13',
+ 'HOST_GNU_TYPE': 'aarch64-apple-ios14.0',
+ 'INCLDIRSTOMAKE': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include '
+                   '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include '
+                   '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include/python3.12 '
+                   '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include/python3.12',
+ 'INCLUDEDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include',
+ 'INCLUDEPY': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/include/python3.12',
  'INSTALL': '/usr/bin/install -c',
  'INSTALL_DATA': '/usr/bin/install -c -m 644',
  'INSTALL_PROGRAM': '/usr/bin/install -c',
  'INSTALL_SCRIPT': '/usr/bin/install -c',
  'INSTALL_SHARED': '/usr/bin/install -c -m 755',
- 'INSTSONAME': 'libpython3.13.a',
+ 'INSTSONAME': 'libpython3.12.a',
  'IO_H': 'Modules/_io/_iomodule.h',
  'IO_OBJS': '\\',
- 'LDCXXSHARED': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi '
-                '-bundle -undefined dynamic_lookup',
+ 'LDCXXSHARED': 'cxx-macosx.arm64 -dynamiclib -undefined dynamic_lookup',
  'LDFLAGS': '-mios-version-min=14.0',
  'LDFLAGS_NODIST': '',
- 'LDLIBRARY': 'libpython3.13.a',
+ 'LDLIBRARY': 'libpython3.12.a',
  'LDLIBRARYDIR': '',
- 'LDSHARED': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi '
-             '-bundle -undefined dynamic_lookup -mios-version-min=14.0',
- 'LDVERSION': '3.13',
+ 'LDSHARED': 'cc-macosx.arm64 -dynamiclib -undefined dynamic_lookup '
+             '-mios-version-min=14.0',
+ 'LDVERSION': '3.12',
  'LIBC': '',
- 'LIBDEST': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13',
- 'LIBDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib',
+ 'LIBDEST': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12',
+ 'LIBDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib',
  'LIBEXPAT_A': 'Modules/expat/libexpat.a',
- 'LIBEXPAT_CFLAGS': '-I./Modules/expat -Wsign-compare -Wunreachable-code '
-                    '-DNDEBUG -g -fwrapv -O3 -Wall -mios-version-min=14.0 '
-                    '-std=c11 -Wextra -Wno-unused-parameter '
-                    '-Wno-missing-field-initializers -Wstrict-prototypes '
-                    '-Werror=implicit-function-declaration '
+ 'LIBEXPAT_CFLAGS': '-I./Modules/expat -fno-strict-overflow -Wsign-compare '
+                    '-Wunreachable-code -DNDEBUG -g -O3 -Wall '
+                    '-mios-version-min=14.0 -std=c11 -Wextra '
+                    '-Wno-unused-parameter -Wno-missing-field-initializers '
+                    '-Wstrict-prototypes -Werror=implicit-function-declaration '
                     '-fvisibility=hidden  -I./Include/internal -I. -I./Include',
  'LIBEXPAT_HEADERS': '\\',
  'LIBEXPAT_OBJS': '\\',
- 'LIBFFI_INCLUDEDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/libffi-3.4.2/include',
- 'LIBFFI_LIB': 'ffi',
- 'LIBFFI_LIBDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/libffi-3.4.2/lib',
+ 'LIBHACL_CFLAGS': '-I./Modules/_hacl/include -D_BSD_SOURCE -D_DEFAULT_SOURCE '
+                   '-fno-strict-overflow -Wsign-compare -Wunreachable-code '
+                   '-DNDEBUG -g -O3 -Wall -mios-version-min=14.0 -std=c11 '
+                   '-Wextra -Wno-unused-parameter '
+                   '-Wno-missing-field-initializers -Wstrict-prototypes '
+                   '-Werror=implicit-function-declaration -fvisibility=hidden  '
+                   '-I./Include/internal -I. -I./Include',
+ 'LIBHACL_HEADERS': '\\',
+ 'LIBHACL_SHA2_A': 'Modules/_hacl/libHacl_Hash_SHA2.a',
+ 'LIBHACL_SHA2_HEADERS': '\\',
+ 'LIBHACL_SHA2_OBJS': '\\',
  'LIBM': '-lm',
  'LIBMPDEC_A': 'Modules/_decimal/libmpdec/libmpdec.a',
  'LIBMPDEC_CFLAGS': '-I./Modules/_decimal/libmpdec -DCONFIG_64=1 -DANSI=1 '
-                    '-DHAVE_UINT128_T=1 -Wsign-compare -Wunreachable-code '
-                    '-DNDEBUG -g -fwrapv -O3 -Wall -mios-version-min=14.0 '
-                    '-std=c11 -Wextra -Wno-unused-parameter '
-                    '-Wno-missing-field-initializers -Wstrict-prototypes '
-                    '-Werror=implicit-function-declaration '
+                    '-DHAVE_UINT128_T=1 -fno-strict-overflow -Wsign-compare '
+                    '-Wunreachable-code -DNDEBUG -g -O3 -Wall '
+                    '-mios-version-min=14.0 -std=c11 -Wextra '
+                    '-Wno-unused-parameter -Wno-missing-field-initializers '
+                    '-Wstrict-prototypes -Werror=implicit-function-declaration '
                     '-fvisibility=hidden  -I./Include/internal -I. -I./Include',
  'LIBMPDEC_HEADERS': '\\',
  'LIBMPDEC_OBJS': '\\',
  'LIBOBJDIR': 'Python/',
  'LIBOBJS': '',
- 'LIBPC': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/pkgconfig',
- 'LIBPL': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13/config-3.13-iphoneos',
+ 'LIBPC': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/pkgconfig',
+ 'LIBPL': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12/config-3.12-iphoneos-arm64',
  'LIBPYTHON': '',
- 'LIBRARY': 'libpython3.13.a',
- 'LIBRARY_DEPS': 'libpython3.13.a',
+ 'LIBRARY': 'libpython3.12.a',
+ 'LIBRARY_DEPS': 'libpython3.12.a',
  'LIBRARY_OBJS': '\\',
  'LIBRARY_OBJS_OMIT_FROZEN': '\\',
  'LIBS': '-ldl  -lpthread',
  'LIBSUBDIRS': 'asyncio \\',
- 'LINKCC': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi',
+ 'LINKCC': 'cc-macosx.arm64',
  'LINKFORSHARED': '',
- 'LINK_PYTHON_DEPS': 'libpython3.13.a',
+ 'LINK_PYTHON_DEPS': 'libpython3.12.a',
  'LINK_PYTHON_OBJS': '\\',
  'LIPO_32BIT_FLAGS': '',
  'LIPO_INTEL64_FLAGS': '',
- 'LLVM_PROF_ERR': 'yes',
- 'LLVM_PROF_FILE': 'LLVM_PROFILE_FILE="code-%p.profclangr"',
- 'LLVM_PROF_MERGER': "'' merge -output=code.profclangd *.profclangr",
+ 'LLVM_PROF_ERR': 'no',
+ 'LLVM_PROF_FILE': '',
+ 'LLVM_PROF_MERGER': '',
  'LN': 'ln',
  'LOCALMODLIBS': '',
  'MACHDEP': 'ios',
  'MACHDEP_OBJS': '',
- 'MACHDESTLIB': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13',
+ 'MACHDESTLIB': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12',
  'MACOSX_DEPLOYMENT_TARGET': '',
- 'MAINCC': 'xcrun --sdk macosx clang -target x86_64-apple-ios14.0-macabi',
  'MAJOR_IN_MKDEV': 0,
  'MAJOR_IN_SYSMACROS': 0,
  'MAKESETUP': './Modules/makesetup',
- 'MANDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/share/man',
+ 'MANDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/share/man',
  'MKDIR_P': './install-sh -c -d',
- 'MODBUILT_NAMES': 'atexit  faulthandler  posix  _signal  _tracemalloc  '
-                   '_codecs  _collections  errno  _io  itertools  _sre  '
-                   '_thread  time  _weakref  _abc  _functools  _locale  '
-                   '_operator  _stat  _symtable  xxsubtype',
+ 'MODBUILT_NAMES': 'array  _asyncio  _bisect  _contextvars  _csv  _heapq  '
+                   '_json  _lsprof  _opcode  _pickle  _queue  _random  '
+                   '_struct  _xxinterpchannels  _zoneinfo  audioop  math  '
+                   'cmath  _statistics  _datetime  _decimal  binascii  _bz2  '
+                   '_lzma  zlib  _dbm  _md5  _sha1  _sha2  _sha3  _blake2  '
+                   'pyexpat  _elementtree  _codecs_cn  _codecs_hk  '
+                   '_codecs_iso2022  _codecs_jp  _codecs_kr  _codecs_tw  '
+                   '_multibytecodec  unicodedata  _crypt  fcntl  mmap  '
+                   'resource  select  _socket  termios  _sqlite3  _ssl  '
+                   '_hashlib  _uuid  xxsubtype  _xxtestfuzz  _testbuffer  '
+                   '_testinternalcapi  _testcapi  _testclinic  '
+                   '_testimportmultiple  _testmultiphase  _testsinglephase  '
+                   'xxlimited  xxlimited_35  atexit  faulthandler  posix  '
+                   '_signal  _tracemalloc  _codecs  _collections  errno  _io  '
+                   'itertools  _sre  _thread  time  _typing  _weakref  _abc  '
+                   '_functools  _locale  _operator  _stat  _symtable',
  'MODDISABLED_NAMES': '',
  'MODLIBS': '',
  'MODOBJS': 'Modules/atexitmodule.o  Modules/faulthandler.o  '
@@ -709,10 +736,21 @@ build_time_vars = {'ABIFLAGS': '',
             'Modules/_io/textio.o Modules/_io/stringio.o  '
             'Modules/itertoolsmodule.o  Modules/_sre/sre.o  '
             'Modules/_threadmodule.o  Modules/timemodule.o  '
-            'Modules/_weakref.o  Modules/_abc.o  Modules/_functoolsmodule.o  '
-            'Modules/_localemodule.o  Modules/_operator.o  Modules/_stat.o  '
-            'Modules/symtablemodule.o  Modules/xxsubtype.o',
- 'MODSHARED_NAMES': '',
+            'Modules/_typingmodule.o  Modules/_weakref.o  Modules/_abc.o  '
+            'Modules/_functoolsmodule.o  Modules/_localemodule.o  '
+            'Modules/_operator.o  Modules/_stat.o  Modules/symtablemodule.o',
+ 'MODSHARED_NAMES': 'array _asyncio _bisect _contextvars _csv _heapq _json '
+                    '_lsprof _opcode _pickle _queue _random _struct '
+                    '_xxinterpchannels _zoneinfo audioop math cmath '
+                    '_statistics _datetime _decimal binascii _bz2 _lzma zlib '
+                    '_dbm _md5 _sha1 _sha2 _sha3 _blake2 pyexpat _elementtree '
+                    '_codecs_cn _codecs_hk _codecs_iso2022 _codecs_jp '
+                    '_codecs_kr _codecs_tw _multibytecodec unicodedata _crypt '
+                    'fcntl mmap resource select _socket termios _sqlite3 _ssl '
+                    '_hashlib _uuid xxsubtype _xxtestfuzz _testbuffer '
+                    '_testinternalcapi _testcapi _testclinic '
+                    '_testimportmultiple _testmultiphase _testsinglephase '
+                    'xxlimited xxlimited_35',
  'MODULE_ARRAY_STATE': 'yes',
  'MODULE_ATEXIT_LDFLAGS': '',
  'MODULE_AUDIOOP_LDFLAGS': '-lm',
@@ -723,6 +761,8 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE_CMATH_DEPS': './Modules/_math.h',
  'MODULE_CMATH_LDFLAGS': '-lm',
  'MODULE_CMATH_STATE': 'yes',
+ 'MODULE_DEPS_SHARED': 'Modules/config.c',
+ 'MODULE_DEPS_STATIC': 'Modules/config.c',
  'MODULE_ERRNO_LDFLAGS': '',
  'MODULE_FAULTHANDLER_LDFLAGS': '',
  'MODULE_FCNTL_LDFLAGS': '',
@@ -742,6 +782,7 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE_PYEXPAT_DEPS': '\\ Modules/expat/libexpat.a',
  'MODULE_PYEXPAT_LDFLAGS': '-lm Modules/expat/libexpat.a',
  'MODULE_PYEXPAT_STATE': 'yes',
+ 'MODULE_READLINE_STATE': 'n/a',
  'MODULE_RESOURCE_STATE': 'yes',
  'MODULE_SELECT_STATE': 'yes',
  'MODULE_SPWD_STATE': 'n/a',
@@ -754,7 +795,7 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE_UNICODEDATA_STATE': 'yes',
  'MODULE_XXLIMITED_35_STATE': 'yes',
  'MODULE_XXLIMITED_STATE': 'yes',
- 'MODULE_XXSUBTYPE_LDFLAGS': '',
+ 'MODULE_XXSUBTYPE_STATE': 'yes',
  'MODULE_ZLIB_CFLAGS': '',
  'MODULE_ZLIB_LDFLAGS': '-lz',
  'MODULE_ZLIB_STATE': 'yes',
@@ -783,12 +824,35 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE__BZ2_LDFLAGS': '-L/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/bzip2-1.0.8/lib '
                         '-lbz2',
  'MODULE__BZ2_STATE': 'yes',
+ 'MODULE__CODECS_CN_DEPS': './Modules/cjkcodecs/mappings_cn.h '
+                           './Modules/cjkcodecs/multibytecodec.h '
+                           './Modules/cjkcodecs/cjkcodecs.h',
  'MODULE__CODECS_CN_STATE': 'yes',
+ 'MODULE__CODECS_HK_DEPS': './Modules/cjkcodecs/mappings_hk.h  '
+                           './Modules/cjkcodecs/multibytecodec.h '
+                           './Modules/cjkcodecs/cjkcodecs.h',
  'MODULE__CODECS_HK_STATE': 'yes',
+ 'MODULE__CODECS_ISO2022_DEPS': './Modules/cjkcodecs/mappings_jisx0213_pair.h '
+                                './Modules/cjkcodecs/alg_jisx0201.h '
+                                './Modules/cjkcodecs/emu_jisx0213_2000.h '
+                                './Modules/cjkcodecs/multibytecodec.h '
+                                './Modules/cjkcodecs/cjkcodecs.h',
  'MODULE__CODECS_ISO2022_STATE': 'yes',
+ 'MODULE__CODECS_JP_DEPS': './Modules/cjkcodecs/mappings_jisx0213_pair.h '
+                           './Modules/cjkcodecs/alg_jisx0201.h '
+                           './Modules/cjkcodecs/emu_jisx0213_2000.h '
+                           './Modules/cjkcodecs/mappings_jp.h '
+                           './Modules/cjkcodecs/multibytecodec.h '
+                           './Modules/cjkcodecs/cjkcodecs.h',
  'MODULE__CODECS_JP_STATE': 'yes',
+ 'MODULE__CODECS_KR_DEPS': './Modules/cjkcodecs/mappings_kr.h '
+                           './Modules/cjkcodecs/multibytecodec.h '
+                           './Modules/cjkcodecs/cjkcodecs.h',
  'MODULE__CODECS_KR_STATE': 'yes',
  'MODULE__CODECS_LDFLAGS': '',
+ 'MODULE__CODECS_TW_DEPS': './Modules/cjkcodecs/mappings_tw.h '
+                           './Modules/cjkcodecs/multibytecodec.h '
+                           './Modules/cjkcodecs/cjkcodecs.h',
  'MODULE__CODECS_TW_STATE': 'yes',
  'MODULE__COLLECTIONS_LDFLAGS': '',
  'MODULE__CONTEXTVARS_STATE': 'yes',
@@ -797,10 +861,16 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE__CRYPT_STATE': 'yes',
  'MODULE__CSV_STATE': 'yes',
  'MODULE__CTYPES_DEPS': './Modules/_ctypes/ctypes.h',
- 'MODULE__CTYPES_TEST_LDFLAGS': '-lm',
- 'MODULE__CTYPES_TEST_STATE': 'yes',
+ 'MODULE__CTYPES_MALLOC_CLOSURE': '',
+ 'MODULE__CTYPES_STATE': 'missing',
+ 'MODULE__CTYPES_TEST_STATE': 'missing',
+ 'MODULE__CURSES_PANEL_STATE': 'n/a',
+ 'MODULE__CURSES_STATE': 'n/a',
  'MODULE__DATETIME_LDFLAGS': '-lm',
  'MODULE__DATETIME_STATE': 'yes',
+ 'MODULE__DBM_CFLAGS': '-DUSE_NDBM',
+ 'MODULE__DBM_LDFLAGS': '',
+ 'MODULE__DBM_STATE': 'yes',
  'MODULE__DECIMAL_CFLAGS': '-I./Modules/_decimal/libmpdec -DCONFIG_64=1 '
                            '-DANSI=1 -DHAVE_UINT128_T=1',
  'MODULE__DECIMAL_DEPS': './Modules/_decimal/docstrings.h \\ '
@@ -829,8 +899,12 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE__LZMA_LDFLAGS': '-L/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/xz-5.4.2/lib '
                          '-llzma',
  'MODULE__LZMA_STATE': 'yes',
- 'MODULE__MD5_DEPS': './Modules/hashlib.h',
+ 'MODULE__MD5_CFLAGS': '-I./Modules/_hacl/include -I./Modules/_hacl/internal '
+                       '-D_BSD_SOURCE -D_DEFAULT_SOURCE',
+ 'MODULE__MD5_DEPS': './Modules/hashlib.h \\ Modules/_hacl/Hacl_Hash_MD5.h '
+                     'Modules/_hacl/Hacl_Hash_MD5.c',
  'MODULE__MD5_STATE': 'yes',
+ 'MODULE__MULTIBYTECODEC_DEPS': './Modules/cjkcodecs/multibytecodec.h',
  'MODULE__MULTIBYTECODEC_STATE': 'yes',
  'MODULE__MULTIPROCESSING_STATE': 'n/a',
  'MODULE__OPCODE_STATE': 'yes',
@@ -841,15 +915,19 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE__QUEUE_STATE': 'yes',
  'MODULE__RANDOM_STATE': 'yes',
  'MODULE__SCPROXY_STATE': 'n/a',
- 'MODULE__SHA1_DEPS': './Modules/hashlib.h',
+ 'MODULE__SHA1_CFLAGS': '-I./Modules/_hacl/include -I./Modules/_hacl/internal '
+                        '-D_BSD_SOURCE -D_DEFAULT_SOURCE',
+ 'MODULE__SHA1_DEPS': './Modules/hashlib.h \\ Modules/_hacl/Hacl_Hash_SHA1.h '
+                      'Modules/_hacl/Hacl_Hash_SHA1.c',
  'MODULE__SHA1_STATE': 'yes',
- 'MODULE__SHA256_DEPS': './Modules/hashlib.h',
- 'MODULE__SHA256_STATE': 'yes',
- 'MODULE__SHA3_DEPS': './Modules/_sha3/sha3.c ./Modules/_sha3/sha3.h '
-                      './Modules/hashlib.h',
+ 'MODULE__SHA2_CFLAGS': '-I./Modules/_hacl/include -I./Modules/_hacl/internal '
+                        '-D_BSD_SOURCE -D_DEFAULT_SOURCE',
+ 'MODULE__SHA2_DEPS': './Modules/hashlib.h \\ '
+                      'Modules/_hacl/libHacl_Hash_SHA2.a',
+ 'MODULE__SHA2_STATE': 'yes',
+ 'MODULE__SHA3_DEPS': './Modules/hashlib.h \\ Modules/_hacl/Hacl_Hash_SHA3.h '
+                      'Modules/_hacl/Hacl_Hash_SHA3.c',
  'MODULE__SHA3_STATE': 'yes',
- 'MODULE__SHA512_DEPS': './Modules/hashlib.h',
- 'MODULE__SHA512_STATE': 'yes',
  'MODULE__SIGNAL_LDFLAGS': '',
  'MODULE__SOCKET_DEPS': './Modules/socketmodule.h ./Modules/addrinfo.h '
                         './Modules/getaddrinfo.c ./Modules/getnameinfo.c',
@@ -878,7 +956,9 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE__STRUCT_STATE': 'yes',
  'MODULE__SYMTABLE_LDFLAGS': '',
  'MODULE__TESTBUFFER_STATE': 'yes',
- 'MODULE__TESTCAPI_DEPS': './Modules/testcapi_long.h',
+ 'MODULE__TESTCAPI_DEPS': './Modules/_testcapi/testcapi_long.h '
+                          './Modules/_testcapi/parts.h '
+                          './Modules/_testcapi/util.h',
  'MODULE__TESTCAPI_STATE': 'yes',
  'MODULE__TESTCLINIC_STATE': 'yes',
  'MODULE__TESTIMPORTMULTIPLE_STATE': 'yes',
@@ -887,25 +967,22 @@ build_time_vars = {'ABIFLAGS': '',
  'MODULE__THREAD_LDFLAGS': '',
  'MODULE__TKINTER_STATE': 'n/a',
  'MODULE__TRACEMALLOC_LDFLAGS': '',
+ 'MODULE__TYPING_LDFLAGS': '',
  'MODULE__TYPING_STATE': 'yes',
  'MODULE__UUID_CFLAGS': '',
  'MODULE__UUID_LDFLAGS': '',
  'MODULE__UUID_STATE': 'yes',
  'MODULE__WEAKREF_LDFLAGS': '',
+ 'MODULE__XXINTERPCHANNELS_STATE': 'yes',
  'MODULE__XXSUBINTERPRETERS_STATE': 'n/a',
  'MODULE__XXTESTFUZZ_STATE': 'yes',
  'MODULE__ZONEINFO_STATE': 'yes',
- 'MULTIARCH': 'iphoneos',
- 'MULTIARCH_CPPFLAGS': '-DMULTIARCH=\\"iphoneos\\"',
+ 'MULTIARCH': 'iphoneos-arm64',
+ 'MULTIARCH_CPPFLAGS': '-DMULTIARCH=\\"iphoneos-arm64\\"',
  'MVWDELCH_IS_EXPRESSION': 1,
- 'NO_AS_NEEDED': '-Wl,--no-as-needed',
+ 'NO_AS_NEEDED': '',
  'OBJECT_OBJS': '\\',
- 'OPENSSL_INCLUDES': '-I/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/openssl-3.1.0/include',
- 'OPENSSL_LDFLAGS': '-L/Users/johnzhou/Desktop/run/Python-Apple-support/macios/merge/iOS/macosx/openssl-3.1.0/lib',
- 'OPENSSL_LIBS': '-lssl -lcrypto',
- 'OPENSSL_RPATH': '',
- 'OPT': '-DNDEBUG -g -fwrapv -O3 -Wall',
- 'OTHER_LIBTOOL_OPT': '',
+ 'OPT': '-DNDEBUG -g -O3 -Wall',
  'PACKAGE_BUGREPORT': 0,
  'PACKAGE_NAME': 0,
  'PACKAGE_STRING': 0,
@@ -916,8 +993,8 @@ build_time_vars = {'ABIFLAGS': '',
  'PARSER_OBJS': '\\ \\ Parser/myreadline.o Parser/tokenizer.o',
  'PEGEN_HEADERS': '\\',
  'PEGEN_OBJS': '\\',
- 'PGO_PROF_GEN_FLAG': '-fprofile-instr-generate',
- 'PGO_PROF_USE_FLAG': '-fprofile-instr-use=code.profclangd',
+ 'PGO_PROF_GEN_FLAG': '',
+ 'PGO_PROF_USE_FLAG': '',
  'PLATLIBDIR': 'lib',
  'POBJS': '\\',
  'POSIX_SEMAPHORES_NOT_ENABLED': 0,
@@ -933,44 +1010,45 @@ build_time_vars = {'ABIFLAGS': '',
  'PYTHONFRAMEWORKINSTALLDIR': '',
  'PYTHONFRAMEWORKPREFIX': '',
  'PYTHONPATH': '',
- 'PYTHON_FOR_BUILD': '_PYTHON_PROJECT_BASE=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1 '
+ 'PYTHON_FOR_BUILD': '_PYTHON_PROJECT_BASE=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0 '
                      '_PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) '
                      'PYTHONPATH=$(shell test -f pybuilddir.txt && echo '
-                     '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1/`cat '
+                     '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0/`cat '
                      'pybuilddir.txt`:)./Lib '
-                     '_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__ios_iphoneos '
-                     '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13',
+                     '_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__ios_iphoneos-arm64 '
+                     '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12',
  'PYTHON_FOR_BUILD_DEPS': '',
- 'PYTHON_FOR_FREEZE': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13',
+ 'PYTHON_FOR_FREEZE': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12',
  'PYTHON_FOR_REGEN': '',
  'PYTHON_HEADERS': '\\',
  'PYTHON_OBJS': '\\',
- 'PY_BUILTIN_HASHLIB_HASHES': '"md5,sha1,sha256,sha512,sha3,blake2"',
- 'PY_BUILTIN_MODULE_CFLAGS': '-Wsign-compare -Wunreachable-code -DNDEBUG -g '
-                             '-fwrapv -O3 -Wall -mios-version-min=14.0 '
-                             '-std=c11 -Wextra -Wno-unused-parameter '
+ 'PY_BUILTIN_HASHLIB_HASHES': '"md5,sha1,sha2,sha3,blake2"',
+ 'PY_BUILTIN_MODULE_CFLAGS': '-fno-strict-overflow -Wsign-compare '
+                             '-Wunreachable-code -DNDEBUG -g -O3 -Wall '
+                             '-mios-version-min=14.0 -std=c11 -Wextra '
+                             '-Wno-unused-parameter '
                              '-Wno-missing-field-initializers '
                              '-Wstrict-prototypes '
                              '-Werror=implicit-function-declaration '
                              '-fvisibility=hidden  -I./Include/internal -I. '
                              '-I./Include -DPy_BUILD_CORE_BUILTIN',
- 'PY_CFLAGS': '-Wsign-compare -Wunreachable-code -DNDEBUG -g -fwrapv -O3 -Wall '
-              '-mios-version-min=14.0',
+ 'PY_CFLAGS': '-fno-strict-overflow -Wsign-compare -Wunreachable-code -DNDEBUG '
+              '-g -O3 -Wall -mios-version-min=14.0',
  'PY_CFLAGS_NODIST': '-std=c11 -Wextra -Wno-unused-parameter '
                      '-Wno-missing-field-initializers -Wstrict-prototypes '
                      '-Werror=implicit-function-declaration '
                      '-fvisibility=hidden  -I./Include/internal',
  'PY_COERCE_C_LOCALE': 1,
- 'PY_CORE_CFLAGS': '-Wsign-compare -Wunreachable-code -DNDEBUG -g -fwrapv -O3 '
-                   '-Wall -mios-version-min=14.0 -std=c11 -Wextra '
-                   '-Wno-unused-parameter -Wno-missing-field-initializers '
-                   '-Wstrict-prototypes -Werror=implicit-function-declaration '
-                   '-fvisibility=hidden  -I./Include/internal -I. -I./Include '
-                   '-DPy_BUILD_CORE',
+ 'PY_CORE_CFLAGS': '-fno-strict-overflow -Wsign-compare -Wunreachable-code '
+                   '-DNDEBUG -g -O3 -Wall -mios-version-min=14.0 -std=c11 '
+                   '-Wextra -Wno-unused-parameter '
+                   '-Wno-missing-field-initializers -Wstrict-prototypes '
+                   '-Werror=implicit-function-declaration -fvisibility=hidden  '
+                   '-I./Include/internal -I. -I./Include -DPy_BUILD_CORE',
  'PY_CORE_LDFLAGS': '-mios-version-min=14.0',
  'PY_CPPFLAGS': '-I. -I./Include',
  'PY_ENABLE_SHARED': 0,
- 'PY_FORMAT_SIZE_T': '"z"',
+ 'PY_HAVE_PERF_TRAMPOLINE': 0,
  'PY_LDFLAGS': '-mios-version-min=14.0',
  'PY_LDFLAGS_NODIST': '',
  'PY_LDFLAGS_NOLTO': '-mios-version-min=14.0',
@@ -978,29 +1056,96 @@ build_time_vars = {'ABIFLAGS': '',
  'PY_SQLITE_HAVE_SERIALIZE': 1,
  'PY_SSL_DEFAULT_CIPHERS': 1,
  'PY_SSL_DEFAULT_CIPHER_STRING': 0,
- 'PY_STDMODULE_CFLAGS': '-Wsign-compare -Wunreachable-code -DNDEBUG -g -fwrapv '
-                        '-O3 -Wall -mios-version-min=14.0 -std=c11 -Wextra '
+ 'PY_STDMODULE_CFLAGS': '-fno-strict-overflow -Wsign-compare '
+                        '-Wunreachable-code -DNDEBUG -g -O3 -Wall '
+                        '-mios-version-min=14.0 -std=c11 -Wextra '
                         '-Wno-unused-parameter -Wno-missing-field-initializers '
                         '-Wstrict-prototypes '
                         '-Werror=implicit-function-declaration '
                         '-fvisibility=hidden  -I./Include/internal -I. '
                         '-I./Include',
- 'PY_SUPPORT_TIER': 0,
+ 'PY_SUPPORT_TIER': 3,
  'Py_DEBUG': 0,
  'Py_ENABLE_SHARED': 0,
  'Py_HASH_ALGORITHM': 0,
  'Py_STATS': 0,
  'Py_TRACE_REFS': 0,
  'QUICKTESTOPTS': '-x test_subprocess test_io test_lib2to3 \\',
- 'READELF': ':',
+ 'READELF': '@READELF@',
  'RESSRCDIR': 'Mac/Resources/framework',
  'RETSIGTYPE': 'void',
  'RUNSHARED': '',
- 'SCRIPTDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib',
+ 'SCRIPTDIR': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib',
+ 'SCRIPT_2TO3': 'build/scripts-3.12/2to3-3.12',
+ 'SCRIPT_IDLE': 'build/scripts-3.12/idle3.12',
+ 'SCRIPT_PYDOC': 'build/scripts-3.12/pydoc3.12',
  'SETPGRP_HAVE_ARG': 0,
- 'SHELL': '/bin/sh',
+ 'SHAREDMODS': 'Modules/array.cpython-312-iphoneos.dylib '
+               'Modules/_asyncio.cpython-312-iphoneos.dylib '
+               'Modules/_bisect.cpython-312-iphoneos.dylib '
+               'Modules/_contextvars.cpython-312-iphoneos.dylib '
+               'Modules/_csv.cpython-312-iphoneos.dylib '
+               'Modules/_heapq.cpython-312-iphoneos.dylib '
+               'Modules/_json.cpython-312-iphoneos.dylib '
+               'Modules/_lsprof.cpython-312-iphoneos.dylib '
+               'Modules/_opcode.cpython-312-iphoneos.dylib '
+               'Modules/_pickle.cpython-312-iphoneos.dylib '
+               'Modules/_queue.cpython-312-iphoneos.dylib '
+               'Modules/_random.cpython-312-iphoneos.dylib '
+               'Modules/_struct.cpython-312-iphoneos.dylib '
+               'Modules/_xxinterpchannels.cpython-312-iphoneos.dylib '
+               'Modules/_zoneinfo.cpython-312-iphoneos.dylib '
+               'Modules/audioop.cpython-312-iphoneos.dylib '
+               'Modules/math.cpython-312-iphoneos.dylib '
+               'Modules/cmath.cpython-312-iphoneos.dylib '
+               'Modules/_statistics.cpython-312-iphoneos.dylib '
+               'Modules/_datetime.cpython-312-iphoneos.dylib '
+               'Modules/_decimal.cpython-312-iphoneos.dylib '
+               'Modules/binascii.cpython-312-iphoneos.dylib '
+               'Modules/_bz2.cpython-312-iphoneos.dylib '
+               'Modules/_lzma.cpython-312-iphoneos.dylib '
+               'Modules/zlib.cpython-312-iphoneos.dylib '
+               'Modules/_dbm.cpython-312-iphoneos.dylib '
+               'Modules/_md5.cpython-312-iphoneos.dylib '
+               'Modules/_sha1.cpython-312-iphoneos.dylib '
+               'Modules/_sha2.cpython-312-iphoneos.dylib '
+               'Modules/_sha3.cpython-312-iphoneos.dylib '
+               'Modules/_blake2.cpython-312-iphoneos.dylib '
+               'Modules/pyexpat.cpython-312-iphoneos.dylib '
+               'Modules/_elementtree.cpython-312-iphoneos.dylib '
+               'Modules/_codecs_cn.cpython-312-iphoneos.dylib '
+               'Modules/_codecs_hk.cpython-312-iphoneos.dylib '
+               'Modules/_codecs_iso2022.cpython-312-iphoneos.dylib '
+               'Modules/_codecs_jp.cpython-312-iphoneos.dylib '
+               'Modules/_codecs_kr.cpython-312-iphoneos.dylib '
+               'Modules/_codecs_tw.cpython-312-iphoneos.dylib '
+               'Modules/_multibytecodec.cpython-312-iphoneos.dylib '
+               'Modules/unicodedata.cpython-312-iphoneos.dylib '
+               'Modules/_crypt.cpython-312-iphoneos.dylib '
+               'Modules/fcntl.cpython-312-iphoneos.dylib '
+               'Modules/mmap.cpython-312-iphoneos.dylib '
+               'Modules/resource.cpython-312-iphoneos.dylib '
+               'Modules/select.cpython-312-iphoneos.dylib '
+               'Modules/_socket.cpython-312-iphoneos.dylib '
+               'Modules/termios.cpython-312-iphoneos.dylib '
+               'Modules/_sqlite3.cpython-312-iphoneos.dylib '
+               'Modules/_ssl.cpython-312-iphoneos.dylib '
+               'Modules/_hashlib.cpython-312-iphoneos.dylib '
+               'Modules/_uuid.cpython-312-iphoneos.dylib '
+               'Modules/xxsubtype.cpython-312-iphoneos.dylib '
+               'Modules/_xxtestfuzz.cpython-312-iphoneos.dylib '
+               'Modules/_testbuffer.cpython-312-iphoneos.dylib '
+               'Modules/_testinternalcapi.cpython-312-iphoneos.dylib '
+               'Modules/_testcapi.cpython-312-iphoneos.dylib '
+               'Modules/_testclinic.cpython-312-iphoneos.dylib '
+               'Modules/_testimportmultiple.cpython-312-iphoneos.dylib '
+               'Modules/_testmultiphase.cpython-312-iphoneos.dylib '
+               'Modules/_testsinglephase.cpython-312-iphoneos.dylib '
+               'Modules/xxlimited.cpython-312-iphoneos.dylib '
+               'Modules/xxlimited_35.cpython-312-iphoneos.dylib',
+ 'SHELL': '/bin/sh -e',
  'SHLIBS': '-ldl  -lpthread',
- 'SHLIB_SUFFIX': '.so',
+ 'SHLIB_SUFFIX': '.dylib',
  'SIGNED_RIGHT_SHIFT_ZERO_FILLS': 0,
  'SITEPATH': '',
  'SIZEOF_DOUBLE': 8,
@@ -1008,7 +1153,7 @@ build_time_vars = {'ABIFLAGS': '',
  'SIZEOF_FPOS_T': 8,
  'SIZEOF_INT': 4,
  'SIZEOF_LONG': 8,
- 'SIZEOF_LONG_DOUBLE': 16,
+ 'SIZEOF_LONG_DOUBLE': 8,
  'SIZEOF_LONG_LONG': 8,
  'SIZEOF_OFF_T': 8,
  'SIZEOF_PID_T': 4,
@@ -1021,11 +1166,11 @@ build_time_vars = {'ABIFLAGS': '',
  'SIZEOF_VOID_P': 8,
  'SIZEOF_WCHAR_T': 4,
  'SIZEOF__BOOL': 1,
- 'SOABI': 'cpython-311-iphoneos',
+ 'SOABI': 'cpython-312-iphoneos',
  'SRCDIRS': 'Modules   Modules/_blake2   Modules/_ctypes   Modules/_decimal   '
-            'Modules/_decimal/libmpdec   Modules/_io   '
-            'Modules/_multiprocessing   Modules/_sha3   Modules/_sqlite   '
-            'Modules/_sre   Modules/_xxtestfuzz   Modules/cjkcodecs   '
+            'Modules/_decimal/libmpdec   Modules/_hacl   Modules/_io   '
+            'Modules/_multiprocessing   Modules/_sqlite   Modules/_sre   '
+            'Modules/_testcapi   Modules/_xxtestfuzz   Modules/cjkcodecs   '
             'Modules/expat   Objects   Parser   Programs   Python   '
             'Python/frozen_modules   Python/deepfreeze',
  'SRC_GDB_HOOKS': './Tools/gdb/libpython.py',
@@ -1039,37 +1184,36 @@ build_time_vars = {'ABIFLAGS': '',
  'SYS_SELECT_WITH_SYS_TIME': 1,
  'TESTOPTS': '',
  'TESTPATH': '',
- 'TESTPYTHON': '_PYTHON_PROJECT_BASE=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1 '
+ 'TESTPYTHON': '_PYTHON_PROJECT_BASE=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0 '
                '_PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) '
                'PYTHONPATH=$(shell test -f pybuilddir.txt && echo '
-               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1/`cat '
+               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0/`cat '
                'pybuilddir.txt`:)./Lib '
-               '_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__ios_iphoneos '
-               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13',
+               '_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__ios_iphoneos-arm64 '
+               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12',
  'TESTPYTHONOPTS': '',
- 'TESTRUNNER': '_PYTHON_PROJECT_BASE=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1 '
+ 'TESTRUNNER': '_PYTHON_PROJECT_BASE=/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0 '
                '_PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) '
                'PYTHONPATH=$(shell test -f pybuilddir.txt && echo '
-               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1/`cat '
+               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0/`cat '
                'pybuilddir.txt`:)./Lib '
-               '_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__ios_iphoneos '
-               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.13.0a1/bin/python3.13 '
+               '_PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata__ios_iphoneos-arm64 '
+               '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/macOS/macosx/python-3.12.0/bin/python3.12 '
                './Tools/scripts/run_tests.py',
- 'TESTSUBDIRS': 'ctypes/test \\',
+ 'TESTSUBDIRS': 'idlelib/idle_test \\',
  'TESTTIMEOUT': 1200,
  'TEST_MODULES': 'yes',
  'THREAD_STACK_SIZE': 0,
  'TIMEMODULE_LIB': 0,
- 'TIME_WITH_SYS_TIME': 1,
  'TM_IN_SYS_TIME': 0,
  'TZPATH': '/usr/share/zoneinfo:/usr/lib/zoneinfo:/usr/share/lib/zoneinfo:/etc/zoneinfo',
  'UNICODE_DEPS': '\\',
  'UNIVERSALSDK': '',
- 'UPDATE_FILE': './Tools/scripts/update_file.py',
+ 'UPDATE_FILE': './Tools/build/update_file.py',
  'USE_COMPUTED_GOTOS': 0,
- 'VERSION': '3.13',
- 'WASM_ASSETS_DIR': './Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1',
- 'WASM_STDLIB': './Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/lib/python3.13/os.py',
+ 'VERSION': '3.12',
+ 'WASM_ASSETS_DIR': './Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0',
+ 'WASM_STDLIB': './Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/lib/python3.12/os.py',
  'WHEEL_PKG_DIR': '',
  'WINDOW_HAS_FLAGS': 1,
  'WITH_DECIMAL_CONTEXTVAR': 1,
@@ -1084,9 +1228,9 @@ build_time_vars = {'ABIFLAGS': '',
  'WITH_VALGRIND': 0,
  'X87_DOUBLE_ROUNDING': 0,
  'XMLLIBSUBDIRS': 'xml xml/dom xml/etree xml/parsers xml/sax',
- 'abs_builddir': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1',
- 'abs_srcdir': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.x86_64/python-3.13.0a1',
- 'datarootdir': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1/share',
- 'exec_prefix': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1',
- 'prefix': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.x86_64/python-3.13.0a1',
+ 'abs_builddir': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0',
+ 'abs_srcdir': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/build/iOS/macosx.arm64/python-3.12.0',
+ 'datarootdir': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0/share',
+ 'exec_prefix': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0',
+ 'prefix': '/Users/johnzhou/Desktop/run/Python-Apple-support/macios/install/iOS/macosx.arm64/python-3.12.0',
  'srcdir': '.'}

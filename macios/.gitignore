@@ -7,7 +7,6 @@ dist
 downloads
 install
 local
-merge
 support
 *.dist-info
 __pycache__
@@ -17,3 +16,4 @@ tests/testbed/iOS
 *.gz
 *.DS_Store
 merge
+alias
