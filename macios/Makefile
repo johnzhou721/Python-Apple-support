@@ -839,14 +839,11 @@ $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_FATLIB-$(sdk))
 		$$(PYTHON_FATSTDLIB-$(sdk))/config-* \
 		$$(PYTHON_FATSTDLIB-$(sdk))/lib-dynload/*
 
-
-	# Those kept for compatability reasons only. We are shipping our own files specially for Catalyst.
-
 	# Copy the cross-target _sysconfigdata module from the patch folder
 #	cp $(PROJECT_DIR)/patch/Python/_sysconfigdata__$$(OS_LOWER-$(sdk))_$(sdk).py $$(PYTHON_FATSTDLIB-$(sdk))
 
 	# Copy the individual _sysconfigdata modules into names that include the architecture
-#	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__$$(OS_LOWER-$(sdk))_$(sdk)_$$(ARCH-$$(target)).py; )
+	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__ios_iphoneos*.py $$(PYTHON_FATSTDLIB-$(sdk))/$$(ARCH-$$(target))_sysconfigdata__ios_iphoneos.py; )
 	###########################################################
 	# Copy the individual config modules directories into names that include the architecture
 	-$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-iphoneos-arm64 $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
@@ -854,8 +851,8 @@ $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_FATLIB-$(sdk))
 	
 	# Ship our own files specially for Catalyst.
 	cp patch/_sysconfigdata__ios_iphoneos-arm64.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__ios_iphoneos-arm64.py
-	cp patch/arm64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/arm64_sysconfigdata__ios_iphoneos.py
-	cp patch/x86_64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/x86_64_sysconfigdata__ios_iphoneos.py
+#	cp patch/arm64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/arm64_sysconfigdata__ios_iphoneos.py
+#	cp patch/x86_64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/x86_64_sysconfigdata__ios_iphoneos.py
 
 	# Merge the binary modules from each target in the $(sdk) SDK into a single binary
 	$$(foreach module,$$(wildcard $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/lib-dynload/*),lipo -create -output $$(PYTHON_FATSTDLIB-$(sdk))/lib-dynload/$$(notdir $$(module)) $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/lib-dynload/$$(notdir $$(module))); )
