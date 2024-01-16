@@ -61,6 +61,8 @@ x86_64 and M1 hardware. This should enable the code to run on:
     * Apple TV (4th gen or later)
 * watchOS 4.0 or later, on:
     * Apple Watch (4th gen or later)
+* visionOS 1.0 or later, on:
+    * Apple Vision Pro
 
 Quickstart
 ----------
