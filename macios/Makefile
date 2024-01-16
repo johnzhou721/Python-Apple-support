@@ -188,9 +188,8 @@ LDFLAGS-$(target)=$$(CFLAGS-$(os))
 
 
 # Aliases
-.PHONY: alias-$(target)
 
-alias-$(target):
+$(PROJECT_DIR)/alias/cc-$(target):
 	-mkdir alias
 	-$(PROJECT_DIR)/patch/make-xcrun-alias $(PROJECT_DIR)/alias/cc-$(target) \
 		"--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))"
@@ -214,7 +213,7 @@ BZIP2_LIB-$(target)=$$(BZIP2_INSTALL-$(target))/lib/libbz2.a
 BZIP2_WHEEL-$(target)=wheels/dist/bzip2/bzip2-$(BZIP2_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 BZIP2_WHEEL_DISTINFO-$(target)=$$(BZIP2_INSTALL-$(target))/wheel/bzip2-$(BZIP2_VERSION).dist-info
 
-$$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz alias-$(target)
+$$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz $(PROJECT_DIR)/alias/cc-$(target)
 	@echo ">>> Unpack BZip2 sources for $(target)"
 	mkdir -p $$(BZIP2_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(BZIP2_SRCDIR-$(target))
@@ -271,7 +270,7 @@ XZ_LIB-$(target)=$$(XZ_INSTALL-$(target))/lib/liblzma.a
 XZ_WHEEL-$(target)=wheels/dist/xz/xz-$(XZ_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 XZ_WHEEL_DISTINFO-$(target)=$$(XZ_INSTALL-$(target))/wheel/xz-$(XZ_VERSION).dist-info
 
-$$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz alias-$(target)
+$$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz $(PROJECT_DIR)/alias/cc-$(target)
 	@echo ">>> Unpack XZ sources for $(target)"
 	mkdir -p $$(XZ_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(XZ_SRCDIR-$(target))
@@ -337,7 +336,7 @@ OPENSSL_CRYPTO_LIB-$(target)=$$(OPENSSL_INSTALL-$(target))/lib/libcrypto.a
 OPENSSL_WHEEL-$(target)=wheels/dist/openssl/openssl-$(OPENSSL_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 OPENSSL_WHEEL_DISTINFO-$(target)=$$(OPENSSL_INSTALL-$(target))/wheel/openssl-$(OPENSSL_VERSION).dist-info
 
-$$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz alias-$(target)
+$$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz $(PROJECT_DIR)/alias/cc-$(target)
 	@echo ">>> Unpack and configure OpenSSL sources for $(target)"
 	mkdir -p $$(OPENSSL_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(OPENSSL_SRCDIR-$(target))
@@ -452,7 +451,7 @@ LIBFFI_LIB-$(target)=$$(LIBFFI_SRCDIR-$(target))/.libs/libffi.a
 LIBFFI_WHEEL-$(target)=wheels/dist/libffi/libffi-$(LIBFFI_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 LIBFFI_WHEEL_DISTINFO-$(target)=$$(LIBFFI_SRCDIR-$(target))/wheel/libffi-$(LIBFFI_VERSION).dist-info
 
-$$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h alias-$(target)
+$$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h $(PROJECT_DIR)/alias/cc-$(target)
 	@echo ">>> Build libFFI for $(target)"
 #	mkdir $$(LIBFFI_SRCDIR-$(target))
 	cd $$(LIBFFI_SRCDIR-$(target)) && \
@@ -524,7 +523,7 @@ $$(PYTHON_SRCDIR-$(target))/Makefile: \
 		$$(OPENSSL_FATINCLUDE-$$(SDK-$(target))) $$(OPENSSL_SSL_FATLIB-$$(SDK-$(target))) $$(OPENSSL_CRYPTO_FATLIB-$$(SDK-$(target))) \
 		$$(LIBFFI_FATLIB-$$(SDK-$(target))) \
 		$$(PYTHON_XCFRAMEWORK-macOS) \
-		alias-$(target)
+		$(PROJECT_DIR)/alias/cc-$(target)
 	@echo ">>> Unpack and configure Python for $(target)"
 	mkdir -p $$(PYTHON_SRCDIR-$(target))
 	tar zxf downloads/Python-$(PYTHON_VERSION).tar.gz --strip-components 1 -C $$(PYTHON_SRCDIR-$(target))
