@@ -58,14 +58,14 @@ CFLAGS-watchOS=-mwatchos-version-min=$(VERSION_MIN-watchOS)
 PYTHON_CONFIGURE-watchOS=ac_cv_func_sigaltstack=no
 
 # xrOS targets
-TARGETS-xrOS=xrsimulator.x86_64 xrsimulator.arm64 xros.arm64
+TARGETS-xrOS=xrsimulator.arm64 xros.arm64
 VERSION_MIN-xrOS=1.0
 CFLAGS-xrOS=
 PYTHON_CONFIGURE-xrOS=ac_cv_func_sigaltstack=no
 
 # The architecture of the machine doing the build
 HOST_ARCH=$(shell uname -m)
-HOST_PYTHON=/Users/johnzhou/Downloads/Python-3.13.0a2/install/bin/python3.13
+HOST_PYTHON=$(shell which python$(PYTHON_VER))
 
 # Force the path to be minimal. This ensures that anything in the user environment
 # (in particular, homebrew and user-provided Python installs) aren't inadvertently
