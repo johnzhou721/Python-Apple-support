@@ -11,9 +11,9 @@ index 6dd7d8d7ca..836c8a3fcf 100644
 +#endif /* __APPLE__ */
 +
 +// tvOS and watchOS don't provide a number of important POSIX functions.
-+#if TARGET_OS_TV || TARGET_OS_WATCH
++#if TARGET_OS_TV || TARGET_OS_WATCH || TARGET_OS_VISION
 +#  undef HAVE_SIGALTSTACK
-+#endif /* TVOS || WATCHOS */
++#endif /* TVOS || WATCHOS || XROS */
  
  #ifndef MS_WINDOWS
     /* register() is useless on Windows, because only SIGSEGV, SIGABRT and
@@ -65,7 +65,7 @@ index 0c2510e161..5567080ba5 100644
          return None
  
 -elif os.name == "posix" and sys.platform == "darwin":
-+elif os.name == "posix" and sys.platform in {'darwin', 'ios', 'tvos', 'watchos'}:
++elif os.name == "posix" and sys.platform in {'darwin', 'ios', 'tvos', 'watchos', 'xros'}:
      from ctypes.macholib.dyld import dyld_find as _dyld_find
      def find_library(name):
          possible = ['lib%s.dylib' % name,
@@ -78,7 +78,7 @@ index 0019897c94..0356d2ab5d 100644
  # Bootstrap-related code ######################################################
  _CASE_INSENSITIVE_PLATFORMS_STR_KEY = 'win',
 -_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY = 'cygwin', 'darwin'
-+_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY = 'cygwin', 'darwin', 'ios', 'tvos', 'watchos'
++_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY = 'cygwin', 'darwin', 'ios', 'tvos', 'watchos', 'xros'
  _CASE_INSENSITIVE_PLATFORMS =  (_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY
                                  + _CASE_INSENSITIVE_PLATFORMS_STR_KEY)
  
@@ -146,7 +146,7 @@ index 0019897c94..0356d2ab5d 100644
      supported_loaders = _get_supported_file_loaders()
      sys.path_hooks.extend([FileFinder.path_hook(*supported_loaders)])
      sys.meta_path.append(PathFinder)
-+    if sys.platform in {"ios", "tvos", "watchos"}:
++    if sys.platform in {"ios", "tvos", "watchos", "xros"}:
 +        frameworks_folder = _path_join(_path_split(sys.executable)[0], "Frameworks")
 +        _bootstrap._verbose_message('Adding Apple Framework dylib finder at {}', frameworks_folder)
 +        sys.meta_path.append(AppleFrameworkFinder(frameworks_folder))
@@ -186,11 +186,11 @@ index 7bb222088d..0a5ed0361e 100755
  
      """
 -    if sys.platform in ('dos', 'win32', 'win16'):
-+    if sys.platform in {'dos', 'win32', 'win16', 'ios', 'tvos', 'watchos'}:
++    if sys.platform in {'dos', 'win32', 'win16', 'ios', 'tvos', 'watchos', 'xros'}:
          # XXX Others too ?
          return default
  
-@@ -814,6 +834,24 @@
+@@ -814,6 +834,28 @@
              csid, cpu_number = vms_lib.getsyi('SYI$_CPU', 0)
              return 'Alpha' if cpu_number >= 128 else 'VAX'
  
@@ -211,6 +211,10 @@ index 7bb222088d..0a5ed0361e 100755
 +        if getattr(sys.implementation, "_simulator", False):
 +            return os.uname().machine
 +        return 'arm64_32'
++    def get_xros():
++        if getattr(sys.implementation, "_simulator", False):
++            return os.uname().machine
++        return 'arm64'
 +
      def from_subprocess():
          """
@@ -258,7 +262,7 @@ index 672fa7b000..9fd399e990 100644
  
      if sys.platform == 'darwin' and sys._framework:
          return f'{userbase}/lib/python/site-packages'
-+    elif sys.platform in ('ios', 'tvos', 'watchos'):
++    elif sys.platform in ('ios', 'tvos', 'watchos', 'xros'):
 +        from sysconfig import get_path
 +        return get_path('purelib', sys.platform)
  
@@ -275,7 +279,7 @@ index 6df5dd551e..597da09643 100644
 -# wasm32-emscripten and wasm32-wasi do not support processes
 -_can_fork_exec = sys.platform not in {"emscripten", "wasi"}
 +# some platforms do not support processes
-+_can_fork_exec = sys.platform not in {"emscripten", "wasi", "ios", "tvos", "watchos"}
++_can_fork_exec = sys.platform not in {"emscripten", "wasi", "ios", "tvos", "watchos", "xros"}
  
  if _mswindows:
      import _winapi
@@ -359,7 +363,7 @@ diff --git a/Lib/sysconfig/__init__.py b/Lib/sysconfig/__init__.py
 index 68d30c0f9e..4a8a27b6d0 100644
 --- a/Lib/sysconfig/__init__.py
 +++ b/Lib/sysconfig/__init__.py
-@@ -96,6 +96,33 @@
+@@ -96,6 +96,42 @@
          'scripts': '{base}/Scripts',
          'data': '{base}',
          },
@@ -390,6 +394,15 @@ index 68d30c0f9e..4a8a27b6d0 100644
 +        'scripts': '{installed_base}/bin',
 +        'data': '{installed_base}/Resources',
 +        },
++    'xros': {
++        'stdlib': '{installed_base}/lib/python{py_version_short}',
++        'platstdlib': '{installed_base}/lib/python{py_version_short}',
++        'purelib': '{installed_base}/lib/python{py_version_short}/site-packages',
++        'platlib': '{installed_base}/lib/python{py_version_short}/site-packages',
++        'include': '{installed_base}/include',
++        'scripts': '{installed_base}/bin',
++        'data': '{installed_base}/Resources',
++        },
      }
  
  # For the OS-native venv scheme, we essentially provide an alias:
@@ -397,7 +410,7 @@ index 68d30c0f9e..4a8a27b6d0 100644
              'home': 'posix_home',
              'user': 'nt_user',
          }
-+    if sys.platform in ('ios', 'tvos', 'watchos'):
++    if sys.platform in ('ios', 'tvos', 'watchos', 'xros'):
 +        return {
 +            'prefix': sys.platform,
 +            'home': sys.platform,
@@ -421,7 +434,7 @@ index 68d30c0f9e..4a8a27b6d0 100644
 -        osname, release, machine = _osx_support.get_platform_osx(
 -                                            get_config_vars(),
 -                                            osname, release, machine)
-+        if sys.platform in ("ios", "tvos", "watchos"):
++        if sys.platform in ("ios", "tvos", "watchos", "xros"):
 +            import _ios_support
 +            _, release, _ = _ios_support.get_platform_ios()
 +            osname = sys.platform
@@ -452,7 +465,7 @@ index 21e8770ab3..67958d247c 100644
  is_android = hasattr(sys, 'getandroidapilevel')
  
 -if sys.platform not in ('win32', 'vxworks'):
-+if sys.platform not in ('win32', 'vxworks', 'ios', 'tvos', 'watchos'):
++if sys.platform not in ('win32', 'vxworks', 'ios', 'tvos', 'watchos', 'xros'):
      unix_shell = '/system/bin/sh' if is_android else '/bin/sh'
  else:
      unix_shell = None
@@ -461,9 +474,9 @@ index 21e8770ab3..67958d247c 100644
  is_wasi = sys.platform == "wasi"
  
 -has_fork_support = hasattr(os, "fork") and not is_emscripten and not is_wasi
-+# Apple mobile platforms (iOS/tvOS/watchOS) are POSIX-like but do not
++# Apple mobile platforms (iOS/tvOS/watchOS/xrOS) are POSIX-like but do not
 +# have subprocess or fork support.
-+is_apple_mobile = sys.platform in ('ios', 'tvos', 'watchos')
++is_apple_mobile = sys.platform in ('ios', 'tvos', 'watchos', 'xros')
 +
 +has_fork_support = (
 +    hasattr(os, "fork")
@@ -810,7 +823,7 @@ index 2169733503..753a137d66 100644
              else:
                  self.assertEqual(res[2], 'PowerPC')
  
-+    @unittest.skipUnless(is_apple_mobile, 'iOS/tvOS/watchOS only test')
++    @unittest.skipUnless(is_apple_mobile, 'iOS/tvOS/watchOS/xrOS only test')
 +    def test_ios_ver(self):
 +        res = platform.ios_ver()
  
@@ -832,7 +845,7 @@ index 9d72dba159..f12e9bb0cb 100644
                               "getpid", "getpgrp", "getppid", "getuid", "sync",
                             ]
  
-+        # getgroups can't be invoked on iOS/tvOS/watchOS.
++        # getgroups can't be invoked on iOS/tvOS/watchOS/xrOS.
 +        if is_apple_mobile:
 +            NO_ARG_FUNCTIONS.append("getgroups")
 +
@@ -1035,7 +1048,7 @@ index 2a6813f00b..c1a7d6eb08 100644
  
      def test_get_scheme_names(self):
 -        wanted = ['nt', 'posix_home', 'posix_prefix', 'posix_venv', 'nt_venv', 'venv']
-+        wanted = ['nt', 'posix_home', 'posix_prefix', 'posix_venv', 'nt_venv', 'venv', 'tvos', 'watchos']
++        wanted = ['nt', 'posix_home', 'posix_prefix', 'posix_venv', 'nt_venv', 'venv', 'tvos', 'watchos', 'xros']
          if HAS_USER_BASE:
              wanted.extend(['nt_user', 'osx_framework_user', 'posix_user'])
          self.assertEqual(get_scheme_names(), tuple(sorted(wanted)))
@@ -1156,7 +1169,7 @@ diff --git a/Misc/platform_triplet.c b/Misc/platform_triplet.c
 index 3307260544..b5db9e8a80 100644
 --- a/Misc/platform_triplet.c
 +++ b/Misc/platform_triplet.c
-@@ -233,7 +233,42 @@
+@@ -233,7 +233,52 @@
  #   error unknown platform triplet
  # endif
  #elif defined(__APPLE__)
@@ -1191,6 +1204,16 @@ index 3307260544..b5db9e8a80 100644
 +#    else
 +PLATFORM_TRIPLET=watchos-arm64_32
 +#    endif
++#  elif TARGET_OS_VISION
++#    if TARGET_OS_SIMULATOR
++#      if __x86_64__
++PLATFORM_TRIPLET=xrsimulator-x86_64
++#      else
++PLATFORM_TRIPLET=xrsimulator-arm64
++#      endif
++#    else
++PLATFORM_TRIPLET=xros-arm64
++#    endif
 +#  elif TARGET_OS_OSX
  PLATFORM_TRIPLET=darwin
 +#  else
@@ -1215,7 +1238,7 @@ index 2898eedc3e..b48a143c34 100644
  # include <sanitizer/msan_interface.h>
  #endif
  
-+// iOS/tvOS/watchOS *define* a number of POSIX functions, but you can't use them
++// iOS/tvOS/watchOS/xrOS *define* a number of POSIX functions, but you can't use them
 +// because they aren't conventional multiprocess environments.
 +#if TARGET_OS_IPHONE
 +#  undef HAVE_FORK
@@ -1229,7 +1252,7 @@ index 2898eedc3e..b48a143c34 100644
      for (i = 0; exec_array[i] != NULL; ++i) {
          const char *executable = exec_array[i];
 +
-+#if TARGET_OS_TV || TARGET_OS_WATCH
++#if TARGET_OS_TV || TARGET_OS_WATCH || TARGET_OS_VISION
 +	errno = ENOTSUP;
 +#else
          if (envp) {
@@ -1237,7 +1260,7 @@ index 2898eedc3e..b48a143c34 100644
          } else {
              execv(executable, argv);
          }
-+#endif /* TARGET_OS_TV || TARGET_OS_WATCH */
++#endif /* TARGET_OS_TV || TARGET_OS_WATCH || visionOS */
          if (errno != ENOENT && errno != ENOTDIR && saved_errno == 0) {
              saved_errno = errno;
          }
@@ -1246,7 +1269,7 @@ index 2898eedc3e..b48a143c34 100644
               PyObject *preexec_fn_args_tuple)
  {
 -
-+/* iOS/tvOS/watchOS define the existence of fork, but it cannot be invoked;
++/* iOS/tvOS/watchOS/xrOS define the existence of fork, but it cannot be invoked;
 + * so fail fast if any attempt is made to invoke fork_exec */
 +#ifdef HAVE_FORK
      pid_t pid;
@@ -1275,7 +1298,7 @@ index 2898eedc3e..b48a143c34 100644
      int *c_fds_to_keep = NULL;
      Py_ssize_t fds_to_keep_len = PyTuple_GET_SIZE(py_fds_to_keep);
  
-+/* iOS/tvOS/watchOS define the existence of fork, but it cannot be invoked;
++/* iOS/tvOS/watchOS/xrOS define the existence of fork, but it cannot be invoked;
 + * so fail fast if any attempt is made to invoke fork_exec */
 +#ifdef HAVE_FORK
 +
@@ -1343,7 +1366,7 @@ index 650ae4bbd6..95c1b3633c 100644
  #  define fsync _commit
  #endif  /* ! __WATCOMC__ || __QNX__ */
  
-+// iOS/tvOS/watchOS *define* a number of POSIX functions, but you can't use them
++// iOS/tvOS/watchOS/xrOS *define* a number of POSIX functions, but you can't use them
 +// because they aren't conventional multiprocess environment.
 +#if TARGET_OS_IPHONE
 +#  undef HAVE_EXECV
@@ -1370,7 +1393,7 @@ index 650ae4bbd6..95c1b3633c 100644
  */
  #include <crt_externs.h>
  #elif !defined(_MSC_VER) && (!defined(__WATCOMC__) || defined(__QNX__) || defined(__VXWORKS__))
-+#  if !TARGET_OS_TV && !TARGET_OS_WATCH
++#  if !TARGET_OS_TV && !TARGET_OS_WATCH && !TARGET_OS_VISION
  extern char **environ;
 +#  endif
  #endif /* !_MSC_VER */
@@ -1380,7 +1403,7 @@ index 650ae4bbd6..95c1b3633c 100644
      d = PyDict_New();
      if (d == NULL)
          return NULL;
-+#if !TARGET_OS_TV && !TARGET_OS_WATCH
++#if !TARGET_OS_TV && !TARGET_OS_WATCH && !TARGET_OS_VISION
  #ifdef MS_WINDOWS
      /* _wenviron must be initialized in this way if the program is started
         through main() instead of wmain(). */
@@ -1388,7 +1411,7 @@ index 650ae4bbd6..95c1b3633c 100644
          Py_DECREF(k);
          Py_DECREF(v);
      }
-+#endif /* !TARGET_OS_TV && !TARGET_OS_WATCH */
++#endif /* !TARGET_OS_TV && !TARGET_OS_WATCH && no Vision Pro */
      return d;
  }
  
@@ -1414,7 +1437,7 @@ index 650ae4bbd6..95c1b3633c 100644
      int is_symlink;
      int need_stat;
  #endif
-+#if !TARGET_OS_TV && !TARGET_OS_WATCH
++#if !TARGET_OS_TV && !TARGET_OS_WATCH && !TARGET_OS_VISION
  #ifdef MS_WINDOWS
      unsigned long dir_bits;
  #endif
@@ -1422,7 +1445,7 @@ index 650ae4bbd6..95c1b3633c 100644
  #endif
  
      return result;
-+#endif /* !TARGET_OS_TV && !TARGET_OS_WATCH */
++#endif /* !TARGET_OS_TV && !TARGET_OS_WATCH and no Vision Pro */
  
  error:
      Py_XDECREF(st_mode);
@@ -1550,7 +1573,7 @@ index 92f2301a01..ef6db7a9bb 100644
  }
  
  #elif defined(HAVE_GETENTROPY)
-+// iOS, tvOS and watchOS have an incomplete definitions of getentropy
++// iOS, tvOS and watchOS and Vision Pro have an incomplete definitions of getentropy
 +// so it is *found* by configure, but doesn't actually exist.
 +#elif defined(HAVE_GETENTROPY) && !TARGET_OS_IPHONE
  #define PY_GETENTROPY 1
@@ -1682,7 +1705,7 @@ index d74fb6deac..09ebc4287c 100755
  	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
  	     | hiux* | abug | nacl* | netware* | windows* \
 -	     | os9* | macos* | osx* | ios* \
-+	     | os9* | macos* | osx* | ios* | tvos* | watchos* \
++	     | os9* | macos* | osx* | ios* | tvos* | watchos* | xros* \
  	     | mpw* | magic* | mmixware* | mon960* | lnews* \
  	     | amigaos* | amigados* | msdos* | newsos* | unicos* | aof* \
  	     | aos* | aros* | cloudabi* | sortix* | twizzler* \
@@ -1690,7 +1713,7 @@ index d74fb6deac..09ebc4287c 100755
  		;;
  	*-eabi* | *-gnueabi*)
  		;;
-+	ios*-simulator | tvos*-simulator | watchos*-simulator)
++	ios*-simulator | tvos*-simulator | watchos*-simulator | xros*-simulator)
 +		;;
  	-*)
  		# Blank kernel with real OS is always fine.
@@ -1699,7 +1722,7 @@ diff --git a/configure b/configure
 index c87f518382..69685cd25a 100755
 --- a/configure
 +++ b/configure
-@@ -4247,6 +4247,15 @@
+@@ -4247,6 +4247,18 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -1712,10 +1735,13 @@ index c87f518382..69685cd25a 100755
 +	*-apple-watchos*)
 +		ac_sys_system=watchOS
 +		;;
++       *-apple-xros*)
++		ac_sys_system=xrOS
++		;;
  	*-*-vxworks*)
  	    ac_sys_system=VxWorks
  	    ;;
-@@ -4303,27 +4312,96 @@
+@@ -4303,27 +4312,116 @@
  	*-*-linux*)
  		case "$host_cpu" in
  		arm*)
@@ -1781,6 +1807,16 @@ index c87f518382..69685cd25a 100755
 +			_host_ident=${_host_os_min_version:3}-watchsimualtor-$host_cpu
 +    esac
 +    ;;
++  *-apple-xros*-simulator)
++    _host_os_min_version=`echo $host | cut -d '-' -f3`
++		case "$host_cpu" in
++		aarch64)
++			_host_ident=${_host_os_min_version:3}-xrsimulator-arm64
++			;;
++		*)
++			_host_ident=${_host_os_min_version:3}-xrsimulator-$host_cpu
++    esac
++    ;;
 +  *-apple-watchos*)
 +    _host_os_min_version=`echo $host | cut -d '-' -f3`
 +		case "$host_cpu" in
@@ -1789,6 +1825,16 @@ index c87f518382..69685cd25a 100755
 +			;;
 +		*)
 +			_host_ident=${_host_os_min_version:3}-watchosos-$host_cpu
++    esac
++    ;;
++  *-apple-xros*)
++    _host_os_min_version=`echo $host | cut -d '-' -f3`
++		case "$host_cpu" in
++		aarch64)
++			_host_ident=${_host_os_min_version:3}-xros-arm64
++			;;
++		*)
++			_host_ident=${_host_os_min_version:3}-xros-$host_cpu
 +    esac
 +    ;;
 +	*-apple-*)
@@ -1818,7 +1864,7 @@ index c87f518382..69685cd25a 100755
  fi
  
  # Some systems cannot stand _XOPEN_SOURCE being defined at all; they
-@@ -4390,6 +4468,13 @@
+@@ -4390,6 +4468,15 @@
      define_xopen_source=no;;
    Darwin/[12][0-9].*)
      define_xopen_source=no;;
@@ -1829,10 +1875,12 @@ index c87f518382..69685cd25a 100755
 +    define_xopen_source=no;;
 +  watchOS/*)
 +    define_xopen_source=no;;
++  xrOS/*)
++    define_xopen_source=no;;
    # On QNX 6.3.2, defining _XOPEN_SOURCE prevents netdb.h from
    # defining NI_NUMERICHOST.
    QNX/6.3.2)
-@@ -6746,6 +6831,12 @@
+@@ -6746,6 +6831,14 @@
  case $ac_sys_system in #(
    Darwin*) :
      MULTIARCH="" ;; #(
@@ -1841,6 +1889,8 @@ index c87f518382..69685cd25a 100755
 +  tvOS) :
 +    MULTIARCH="" ;; #(
 +  watchOS) :
++    MULTIARCH="" ;; #(
++  xrOS) :
 +    MULTIARCH="" ;; #(
    FreeBSD*) :
      MULTIARCH="" ;; #(
@@ -1863,7 +1913,7 @@ index c87f518382..69685cd25a 100755
 +printf "%s\n" "$MULTIARCH" >&6; }
 +
 +case $ac_sys_system in #(
-+  iOS|tvOS|watchOS) :
++  iOS|tvOS|watchOS|xrOS) :
 +    SOABI_PLATFORM=`echo "$PLATFORM_TRIPLET" | cut -d '-' -f1` ;; #(
 +  *) :
 +    SOABI_PLATFORM=$PLATFORM_TRIPLET
@@ -1892,7 +1942,7 @@ index c87f518382..69685cd25a 100755
  		esac
  		;;
  	CYGWIN*)   SHLIB_SUFFIX=.dll;;
-+	iOS|tvOS|watchOS)   SHLIB_SUFFIX=.dylib;;
++	iOS|tvOS|watchOS|xrOS)   SHLIB_SUFFIX=.dylib;;
  	*)	   SHLIB_SUFFIX=.so;;
  	esac
  fi
@@ -1900,7 +1950,7 @@ index c87f518382..69685cd25a 100755
  			BLDSHARED="$LDSHARED"
  		fi
  		;;
-+	iOS/*|tvOS/*|watchOS/*)
++	iOS/*|tvOS/*|watchOS/*|xrOS/*)
 +		LDSHARED='$(CC) -dynamiclib -undefined dynamic_lookup'
 +		LDCXXSHARED='$(CXX) -dynamiclib -undefined dynamic_lookup';;
  	Emscripten|WASI)
@@ -1910,7 +1960,7 @@ index c87f518382..69685cd25a 100755
  
              ctypes_malloc_closure=yes
       ;; #(
-+  iOS|tvOS|watchOS) :
++  iOS|tvOS|watchOS|xrOS) :
 +
 +      ctypes_malloc_closure=yes
 +     ;; #(
@@ -1939,7 +1989,7 @@ index c87f518382..69685cd25a 100755
   ;; #(
      Darwin) :
       ;; #(
-+  iOS|tvOS|watchOS) :
++  iOS|tvOS|watchOS|xrOS) :
 +
 +
 +
@@ -1973,7 +2023,7 @@ diff --git a/configure.ac b/configure.ac
 index cd69f0ede5..135036bf67 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -553,6 +553,15 @@
+@@ -553,6 +553,18 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -1986,10 +2036,13 @@ index cd69f0ede5..135036bf67 100644
 +	*-apple-watchos*)
 +		ac_sys_system=watchOS
 +		;;
++	*-apple-xros*)
++		ac_sys_system=xrOS
++		;;
  	*-*-vxworks*)
  	    ac_sys_system=VxWorks
  	    ;;
-@@ -607,27 +616,96 @@
+@@ -607,27 +616,116 @@
  	*-*-linux*)
  		case "$host_cpu" in
  		arm*)
@@ -2065,6 +2118,26 @@ index cd69f0ede5..135036bf67 100644
 +			_host_ident=${_host_os_min_version:3}-watchosos-$host_cpu
 +    esac
 +    ;;
++  *-apple-xros*-simulator)
++    _host_os_min_version=`echo $host | cut -d '-' -f3`
++		case "$host_cpu" in
++		aarch64)
++			_host_ident=${_host_os_min_version:3}-xros-arm64
++			;;
++		*)
++			_host_ident=${_host_os_min_version:3}-xros-$host_cpu
++    esac
++    ;;
++  *-apple-xros*)
++    _host_os_min_version=`echo $host | cut -d '-' -f3`
++		case "$host_cpu" in
++		aarch64)
++			_host_ident=${_host_os_min_version:3}-xros-arm64
++			;;
++		*)
++			_host_ident=${_host_os_min_version:3}-xros-$host_cpu
++    esac
++    ;;
 +	*-apple-*)
 +		case "$host_cpu" in
 +		arm*)
@@ -2092,7 +2165,7 @@ index cd69f0ede5..135036bf67 100644
  fi
  
  # Some systems cannot stand _XOPEN_SOURCE being defined at all; they
-@@ -693,6 +771,13 @@
+@@ -693,6 +771,15 @@
      define_xopen_source=no;;
    Darwin/@<:@[12]@:>@@<:@0-9@:>@.*)
      define_xopen_source=no;;
@@ -2103,16 +2176,19 @@ index cd69f0ede5..135036bf67 100644
 +    define_xopen_source=no;;
 +  watchOS/*)
 +    define_xopen_source=no;;
++  xrOS/*)
++    define_xopen_source=no;;
    # On QNX 6.3.2, defining _XOPEN_SOURCE prevents netdb.h from
    # defining NI_NUMERICHOST.
    QNX/6.3.2)
-@@ -941,11 +1026,13 @@
+@@ -941,11 +1026,14 @@
  AC_MSG_CHECKING([for multiarch])
  AS_CASE([$ac_sys_system],
    [Darwin*], [MULTIARCH=""],
 +  [iOS], [MULTIARCH=""],
 +  [tvOS], [MULTIARCH=""],
 +  [watchOS], [MULTIARCH=""],
++  [xrOS], [MULTIARCH=""],
    [FreeBSD*], [MULTIARCH=""],
    [MULTIARCH=$($CC --print-multiarch 2>/dev/null)]
  )
@@ -2128,7 +2204,7 @@ index cd69f0ede5..135036bf67 100644
 +AC_MSG_RESULT([$MULTIARCH])
 +
 +AS_CASE([$ac_sys_system],
-+  [iOS|tvOS|watchOS], [SOABI_PLATFORM=`echo "$PLATFORM_TRIPLET" | cut -d '-' -f1`],
++  [iOS|tvOS|watchOS|xrOS], [SOABI_PLATFORM=`echo "$PLATFORM_TRIPLET" | cut -d '-' -f1`],
 +  [SOABI_PLATFORM=$PLATFORM_TRIPLET]
 +)
  
@@ -2148,7 +2224,7 @@ index cd69f0ede5..135036bf67 100644
  		esac
  		;;
  	CYGWIN*)   SHLIB_SUFFIX=.dll;;
-+	iOS|tvOS|watchOS)   SHLIB_SUFFIX=.dylib;;
++	iOS|tvOS|watchOS|xrOS)   SHLIB_SUFFIX=.dylib;;
  	*)	   SHLIB_SUFFIX=.so;;
  	esac
  fi
@@ -2156,7 +2232,7 @@ index cd69f0ede5..135036bf67 100644
  			BLDSHARED="$LDSHARED"
  		fi
  		;;
-+	iOS/*|tvOS/*|watchOS/*)
++	iOS/*|tvOS/*|watchOS/*|xrOS/*)
 +		LDSHARED='$(CC) -dynamiclib -undefined dynamic_lookup'
 +		LDCXXSHARED='$(CXX) -dynamiclib -undefined dynamic_lookup';;
  	Emscripten|WASI)
@@ -2166,7 +2242,7 @@ index cd69f0ede5..135036bf67 100644
        dnl when do we need USING_APPLE_OS_LIBFFI?
        ctypes_malloc_closure=yes
      ],
-+    [iOS|tvOS|watchOS], [
++    [iOS|tvOS|watchOS|xrOS], [
 +      ctypes_malloc_closure=yes
 +    ],
      [sunos5], [AS_VAR_APPEND([LIBFFI_LIBS], [" -mimpure-text"])]
@@ -2194,7 +2270,7 @@ index cd69f0ede5..135036bf67 100644
    [VxWorks*], [PY_STDLIB_MOD_SET_NA([_scproxy], [termios], [grp])],
    dnl The _scproxy module is available on macOS
    [Darwin], [],
-+  [iOS|tvOS|watchOS], [
++  [iOS|tvOS|watchOS|xrOS], [
 +    dnl subprocess and multiprocessing are not supported (no fork syscall).
 +    dnl curses and tkinter user interface are not available.
 +    dnl gdbm and nis aren't available
