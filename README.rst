@@ -37,6 +37,7 @@ Apple platforms:
 * ``posixshmem``
 * ``posixsubprocess``
 * ``syslog``
+* Those APIs are not available on Mac Catalyst as well.
 
 The binaries support x86_64 and arm64 for macOS; arm64 for iOS and appleTV
 devices; and arm64_32 for watchOS. It also supports device simulators on both
@@ -55,14 +56,11 @@ x86_64 and M1 hardware. This should enable the code to run on:
     * iPad Mini (2 or later)
     * iPad Pro (all models)
     * iPod Touch (7th gen or later)
+    * Mac Catalyst, Big Sur or later; All supported devices.
 * tvOS 9.0 or later, on:
     * Apple TV (4th gen or later)
 * watchOS 4.0 or later, on:
     * Apple Watch (4th gen or later)
-
-Mac Catalyst is version 14.0, supported since Big Sur also.
-
-There is no official build option for Catalyst; it is done by tricking the configure script to think that it is on a real phone. The _sysconfigdata module might not be reliable.
 
 Quickstart
 ----------
