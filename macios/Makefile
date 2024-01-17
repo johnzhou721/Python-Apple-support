@@ -842,7 +842,7 @@ $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_FATLIB-$(sdk))
 #	cp $(PROJECT_DIR)/patch/Python/_sysconfigdata__$$(OS_LOWER-$(sdk))_$(sdk).py $$(PYTHON_FATSTDLIB-$(sdk))
 
 	# Copy the individual _sysconfigdata modules into names that include the architecture
-	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__ios_iphoneos*.py $$(PYTHON_FATSTDLIB-$(sdk))/$$(ARCH-$$(target))_sysconfigdata__ios_iphoneos.py; )
+	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__ios_iphoneos-*.py $$(PYTHON_FATSTDLIB-$(sdk))/$$(ARCH-$$(target))_sysconfigdata__ios_iphoneos.py; )
 	###########################################################
 	# Copy the individual config modules directories into names that include the architecture
 	-$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-iphoneos-arm64 $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
@@ -1053,7 +1053,8 @@ $$(PYTHON_STDLIB-$(os)): \
 #	$$(foreach sdk,$$(SDKS-$(os)),cp -r $$(PYTHON_FATSTDLIB-$$(sdk))/config-$(PYTHON_VER)-* $$(PYTHON_STDLIB-$(os)); )
 
 	# Copy the _sysconfigdata modules from every SDK in $(os) into the support folder.
-	$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_FATSTDLIB-$$(sdk))/_sysconfigdata__*.py $$(PYTHON_STDLIB-$(os)); )
+	-$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_FATSTDLIB-$$(sdk))/*_sysconfigdata__*.py $$(PYTHON_STDLIB-$(os)); )
+	-$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_FATSTDLIB-$$(sdk))/_sysconfigdata__*.py $$(PYTHON_STDLIB-$(os)); )
 
 	# Copy the lib-dynload contents from every SDK in $(os) into the support folder.
 	$$(foreach sdk,$$(SDKS-$(os)),cp $$(PYTHON_FATSTDLIB-$$(sdk))/lib-dynload/* $$(PYTHON_STDLIB-$(os))/lib-dynload; )
