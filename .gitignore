@@ -17,3 +17,4 @@ tests/testbed/iOS
 *.gz
 *.DS_Store
 merge
+macios.tar.gz
