@@ -77,7 +77,7 @@ all: $(OS_LIST) macCatalyst
 
 # Full clean - includes all downloaded products
 distclean: clean
-	rm -rf downloads build dist install support
+	rm -rf downloads build dist install support macios.tar.gz
 
 macCatalyst:
 	$(MAKE) -C macios

@@ -516,14 +516,23 @@ TEST-$(target):
 	@echo $$(PYTHON_SRCDIR-$(target))/Makefile
 	
 	
-$$(PYTHON_SRCDIR-$(target))/Makefile: \
-		downloads/Python-$(PYTHON_VERSION).tar.gz \
-		$$(BZIP2_FATLIB-$$(SDK-$(target))) \
+	
+
+# $$(BZIP2_FATLIB-$$(SDK-$(target))) \
 		$$(XZ_FATLIB-$$(SDK-$(target))) \
 		$$(OPENSSL_FATINCLUDE-$$(SDK-$(target))) $$(OPENSSL_SSL_FATLIB-$$(SDK-$(target))) $$(OPENSSL_CRYPTO_FATLIB-$$(SDK-$(target))) \
 		$$(LIBFFI_FATLIB-$$(SDK-$(target))) \
+
+macios.tar.gz:
+	curl -o macios.tar.gz $(CURL_FLAGS) https://github.com/beeware/cpython-apple-source-deps/releases/download/macios.tar.gz
+
+$$(PYTHON_SRCDIR-$(target))/Makefile: \
+		downloads/Python-$(PYTHON_VERSION).tar.gz \
+		macios.tar.gz \
 		$$(PYTHON_XCFRAMEWORK-macOS) \
+		install/macOS/macosx/python-3.13.0a1/bin/python3 \
 		$(PROJECT_DIR)/alias/cc-$(target)
+	tar zxf macios.tar.gz
 	@echo ">>> Unpack and configure Python for $(target)"
 	mkdir -p $$(PYTHON_SRCDIR-$(target))
 	tar zxf downloads/Python-$(PYTHON_VERSION).tar.gz --strip-components 1 -C $$(PYTHON_SRCDIR-$(target))
