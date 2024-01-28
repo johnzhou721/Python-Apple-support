@@ -64,11 +64,11 @@ all: $(OS_LIST)
 
 # Clean all builds
 clean:
-	rm -rf build install merge dist support wheels
+	rm -rf build install merge dist support wheels alias
 
 # Full clean - includes all downloaded products
 distclean: clean
-	rm -rf downloads
+	rm -rf downloads macios.tar.gz
 
 install/macOS/macosx/python-3.13.0a1/bin/python3:
 	sh macOS.sh
