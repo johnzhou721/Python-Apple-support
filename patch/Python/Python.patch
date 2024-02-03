@@ -1169,7 +1169,7 @@ diff --git a/Misc/platform_triplet.c b/Misc/platform_triplet.c
 index 3307260544..b5db9e8a80 100644
 --- a/Misc/platform_triplet.c
 +++ b/Misc/platform_triplet.c
-@@ -233,7 +233,52 @@
+@@ -233,7 +233,60 @@
  #   error unknown platform triplet
  # endif
  #elif defined(__APPLE__)
@@ -1182,7 +1182,15 @@ index 3307260544..b5db9e8a80 100644
 +PLATFORM_TRIPLET=iphonesimulator-arm64
 +#      endif
 +#    else
++#      if TARGET_OS_MACCATALYST
++#        if __x86_64__
++PLATFORM_TRIPLET=catalyst-x86_64
++#        else
++PLATFORM_TRIPLET=catalyst-arm64
++#        endif
++#      else
 +PLATFORM_TRIPLET=iphoneos-arm64
++#      endif
 +#    endif
 +#  elif TARGET_OS_TV
 +#    if TARGET_OS_SIMULATOR
@@ -1705,7 +1713,7 @@ index d74fb6deac..09ebc4287c 100755
  	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
  	     | hiux* | abug | nacl* | netware* | windows* \
 -	     | os9* | macos* | osx* | ios* \
-+	     | os9* | macos* | osx* | ios* | tvos* | watchos* | xros* \
++	     | os9* | macos* | osx* | ios* | tvos* | watchos* | xros* | macab* \
  	     | mpw* | magic* | mmixware* | mon960* | lnews* \
  	     | amigaos* | amigados* | msdos* | newsos* | unicos* | aof* \
  	     | aos* | aros* | cloudabi* | sortix* | twizzler* \
@@ -1713,7 +1721,7 @@ index d74fb6deac..09ebc4287c 100755
  		;;
  	*-eabi* | *-gnueabi*)
  		;;
-+	ios*-simulator | tvos*-simulator | watchos*-simulator | xros*-simulator)
++	ios*-simulator | tvos*-simulator | watchos*-simulator | xros*-simulator | ios*-macabi)
 +		;;
  	-*)
  		# Blank kernel with real OS is always fine.
@@ -1722,11 +1730,14 @@ diff --git a/configure b/configure
 index c87f518382..69685cd25a 100755
 --- a/configure
 +++ b/configure
-@@ -4247,6 +4247,18 @@
+@@ -4247,6 +4247,21 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
 +	*-apple-ios*)
++		ac_sys_system=iOS
++		;;
++	*-apple-ios*-macabi)
 +		ac_sys_system=iOS
 +		;;
 +	*-apple-tvos*)
@@ -1741,7 +1752,7 @@ index c87f518382..69685cd25a 100755
  	*-*-vxworks*)
  	    ac_sys_system=VxWorks
  	    ;;
-@@ -4303,27 +4312,116 @@
+@@ -4303,27 +4312,126 @@
  	*-*-linux*)
  		case "$host_cpu" in
  		arm*)
@@ -1768,6 +1779,16 @@ index c87f518382..69685cd25a 100755
 +    esac
 +    ;;
 +  *-apple-ios*)
++    _host_os_min_version=`echo $host | cut -d '-' -f3`
++		case "$host_cpu" in
++		aarch64)
++			_host_ident=${_host_os_min_version:3}-iphoneos-arm64
++			;;
++		*)
++			_host_ident=${_host_os_min_version:3}-iphoneos-$host_cpu
++    esac
++    ;;
++  *-apple-ios*-macabi)
 +    _host_os_min_version=`echo $host | cut -d '-' -f3`
 +		case "$host_cpu" in
 +		aarch64)
@@ -1922,7 +1943,7 @@ index c87f518382..69685cd25a 100755
  
  if test x$MULTIARCH != x; then
    MULTIARCH_CPPFLAGS="-DMULTIARCH=\\\"$MULTIARCH\\\""
-@@ -6807,8 +6905,14 @@
+@@ -6807,8 +6905,18 @@
      PY_SUPPORT_TIER=3 ;; #(
      x86_64-*-freebsd*/clang) :
      PY_SUPPORT_TIER=3 ;; #(
@@ -1931,6 +1952,10 @@ index c87f518382..69685cd25a 100755
 +    x86_64-apple-ios*-simulator/clang) :
 +    PY_SUPPORT_TIER=3 ;; #(
 +    aarch64-apple-ios*/clang) :
++    PY_SUPPORT_TIER=3 ;; #(
++    aarch64-apple-ios*-macabi/clang) :
++    PY_SUPPORT_TIER=3 ;; #(
++    x86_64-apple-ios*-macabi/clang) :
 +    PY_SUPPORT_TIER=3 ;; #(
    *) :
 -      PY_SUPPORT_TIER=0
@@ -2023,11 +2048,14 @@ diff --git a/configure.ac b/configure.ac
 index cd69f0ede5..135036bf67 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -553,6 +553,18 @@
+@@ -553,6 +553,21 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
 +	*-apple-ios*)
++		ac_sys_system=iOS
++		;;
++	*-apple-ios*-macabi)
 +		ac_sys_system=iOS
 +		;;
 +	*-apple-tvos*)
@@ -2042,7 +2070,7 @@ index cd69f0ede5..135036bf67 100644
  	*-*-vxworks*)
  	    ac_sys_system=VxWorks
  	    ;;
-@@ -607,27 +616,116 @@
+@@ -607,27 +616,126 @@
  	*-*-linux*)
  		case "$host_cpu" in
  		arm*)
@@ -2066,6 +2094,16 @@ index cd69f0ede5..135036bf67 100644
 +			;;
 +		*)
 +			_host_ident=${_host_os_min_version:3}-iphonesimulator-$host_cpu
++    esac
++    ;;
++  *-apple-ios*-macabi)
++    _host_os_min_version=`echo $host | cut -d '-' -f3`
++		case "$host_cpu" in
++		aarch64)
++			_host_ident=${_host_os_min_version:3}-catalyst-arm64
++			;;
++		*)
++			_host_ident=${_host_os_min_version:3}-catalyst-$host_cpu
 +    esac
 +    ;;
 +  *-apple-ios*)
