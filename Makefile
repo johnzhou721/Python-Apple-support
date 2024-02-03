@@ -303,9 +303,8 @@ $$(PYTHON_SRCDIR-$(target))/Makefile: \
 			LIBLZMA_LIBS="-L$$(XZ_INSTALL-$(target))/lib -llzma" \
 			BZIP2_CFLAGS="-I$$(BZIP2_INSTALL-$(target))/include" \
 			BZIP2_LIBS="-L$$(BZIP2_INSTALL-$(target))/lib -lbz2" \
-			LIBFFI_INCLUDEDIR="$$(LIBFFI_INSTALL-$(target))/include" \
-			LIBFFI_LIBDIR="$$(LIBFFI_INSTALL-$(target))/lib" \
-			LIBFFI_LIB="ffi" \
+		    LIBFFI_CFLAGS="-I$$(LIBFFI_INSTALL-$(target))/include" \
+		    LIBFFI_LIBS="-L$$(LIBFFI_INSTALL-$(target))/lib -lffi" \
 			--host=$$(TARGET_TRIPLE-$(target)) \
 			--build=$(HOST_ARCH)-apple-darwin \
 			--with-build-python=$(HOST_PYTHON) \

@@ -189,7 +189,7 @@ LDFLAGS-$(target)=$$(CFLAGS-$(os))
 
 # Aliases
 
-$(PROJECT_DIR)/alias/cc-$(target):
+alias/cc-$(target):
 	-mkdir alias
 	-$(PROJECT_DIR)/patch/make-xcrun-alias $(PROJECT_DIR)/alias/cc-$(target) \
 		"--sdk $$(SDK-$(target)) clang -target $$(TARGET_TRIPLE-$(target))"
@@ -213,7 +213,7 @@ BZIP2_LIB-$(target)=$$(BZIP2_INSTALL-$(target))/lib/libbz2.a
 BZIP2_WHEEL-$(target)=wheels/dist/bzip2/bzip2-$(BZIP2_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 BZIP2_WHEEL_DISTINFO-$(target)=$$(BZIP2_INSTALL-$(target))/wheel/bzip2-$(BZIP2_VERSION).dist-info
 
-$$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz $(PROJECT_DIR)/alias/cc-$(target)
+$$(BZIP2_SRCDIR-$(target))/Makefile: downloads/bzip2-$(BZIP2_VERSION).tar.gz alias/cc-$(target)
 	@echo ">>> Unpack BZip2 sources for $(target)"
 	mkdir -p $$(BZIP2_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(BZIP2_SRCDIR-$(target))
@@ -270,7 +270,7 @@ XZ_LIB-$(target)=$$(XZ_INSTALL-$(target))/lib/liblzma.a
 XZ_WHEEL-$(target)=wheels/dist/xz/xz-$(XZ_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 XZ_WHEEL_DISTINFO-$(target)=$$(XZ_INSTALL-$(target))/wheel/xz-$(XZ_VERSION).dist-info
 
-$$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz $(PROJECT_DIR)/alias/cc-$(target)
+$$(XZ_SRCDIR-$(target))/Makefile: downloads/xz-$(XZ_VERSION).tar.gz alias/cc-$(target)
 	@echo ">>> Unpack XZ sources for $(target)"
 	mkdir -p $$(XZ_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(XZ_SRCDIR-$(target))
@@ -336,7 +336,7 @@ OPENSSL_CRYPTO_LIB-$(target)=$$(OPENSSL_INSTALL-$(target))/lib/libcrypto.a
 OPENSSL_WHEEL-$(target)=wheels/dist/openssl/openssl-$(OPENSSL_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 OPENSSL_WHEEL_DISTINFO-$(target)=$$(OPENSSL_INSTALL-$(target))/wheel/openssl-$(OPENSSL_VERSION).dist-info
 
-$$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz $(PROJECT_DIR)/alias/cc-$(target)
+$$(OPENSSL_SRCDIR-$(target))/is_configured: downloads/openssl-$(OPENSSL_VERSION).tar.gz alias/cc-$(target)
 	@echo ">>> Unpack and configure OpenSSL sources for $(target)"
 	mkdir -p $$(OPENSSL_SRCDIR-$(target))
 	tar zxf $$< --strip-components 1 -C $$(OPENSSL_SRCDIR-$(target))
@@ -451,7 +451,7 @@ LIBFFI_LIB-$(target)=$$(LIBFFI_SRCDIR-$(target))/.libs/libffi.a
 LIBFFI_WHEEL-$(target)=wheels/dist/libffi/libffi-$(LIBFFI_VERSION)-1-$$(WHEEL_TAG-$(target)).whl
 LIBFFI_WHEEL_DISTINFO-$(target)=$$(LIBFFI_SRCDIR-$(target))/wheel/libffi-$(LIBFFI_VERSION).dist-info
 
-$$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h $(PROJECT_DIR)/alias/cc-$(target)
+$$(LIBFFI_LIB-$(target)): $$(LIBFFI_SRCDIR-$(os))/darwin_common/include/ffi.h alias/cc-$(target)
 	@echo ">>> Build libFFI for $(target)"
 #	mkdir $$(LIBFFI_SRCDIR-$(target))
 	cd $$(LIBFFI_SRCDIR-$(target)) && \
@@ -851,16 +851,16 @@ $$(PYTHON_FATSTDLIB-$(sdk)): $$(PYTHON_FATLIB-$(sdk))
 #	cp $(PROJECT_DIR)/patch/Python/_sysconfigdata__$$(OS_LOWER-$(sdk))_$(sdk).py $$(PYTHON_FATSTDLIB-$(sdk))
 
 	# Copy the individual _sysconfigdata modules into names that include the architecture
-	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__ios_iphoneos-*.py $$(PYTHON_FATSTDLIB-$(sdk))/$$(ARCH-$$(target))_sysconfigdata__ios_iphoneos.py; )
+	$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/_sysconfigdata__*.py $$(PYTHON_FATSTDLIB-$(sdk))/; )
 	###########################################################
 	# Copy the individual config modules directories into names that include the architecture
-	-$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-iphoneos-arm64 $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
-	-$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-iphoneos-x86_64 $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
+	-$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-catalyst-arm64 $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
+	-$$(foreach target,$$(SDK_TARGETS-$(sdk)),cp -r $$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/config-$(PYTHON_VER)-catalyst-x86_64 $$(PYTHON_FATSTDLIB-$(sdk))/config-$(PYTHON_VER)-$$(target)-$$(ARCH-$$(target)); )
 	
 	# Ship our own files specially for Catalyst.
-	cp patch/_sysconfigdata__ios_iphoneos-arm64.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__ios_iphoneos-arm64.py
-#	  cp patch/arm64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/arm64_sysconfigdata__ios_iphoneos.py
-#	  cp patch/x86_64_sysconfigdata__ios_iphoneos.py $$(PYTHON_FATSTDLIB-$(sdk))/x86_64_sysconfigdata__ios_iphoneos.py
+#	cp patch/_sysconfigdata__ios_catalyst-arm64.py $$(PYTHON_FATSTDLIB-$(sdk))/_sysconfigdata__ios_catalyst-arm64.py
+#	  cp patch/arm64_sysconfigdata__ios_catalyst.py $$(PYTHON_FATSTDLIB-$(sdk))/arm64_sysconfigdata__ios_catalyst.py
+#	  cp patch/x86_64_sysconfigdata__ios_catalyst.py $$(PYTHON_FATSTDLIB-$(sdk))/x86_64_sysconfigdata__ios_catalyst.py
 
 	# Merge the binary modules from each target in the $(sdk) SDK into a single binary
 	$$(foreach module,$$(wildcard $$(PYTHON_INSTALL-$$(firstword $$(SDK_TARGETS-$(sdk))))/lib/python$(PYTHON_VER)/lib-dynload/*),lipo -create -output $$(PYTHON_FATSTDLIB-$(sdk))/lib-dynload/$$(notdir $$(module)) $$(foreach target,$$(SDK_TARGETS-$(sdk)),$$(PYTHON_INSTALL-$$(target))/lib/python$(PYTHON_VER)/lib-dynload/$$(notdir $$(module))); )
