@@ -531,7 +531,7 @@ $$(PYTHON_SRCDIR-$(target))/Makefile: \
 		macios.tar.gz \
 		$$(PYTHON_XCFRAMEWORK-macOS) \
 		install/macOS/macosx/python-3.13.0a1/bin/python3 \
-		$(PROJECT_DIR)/alias/cc-$(target)
+		alias/cc-$(target)
 	tar zxf macios.tar.gz
 	@echo ">>> Unpack and configure Python for $(target)"
 	mkdir -p $$(PYTHON_SRCDIR-$(target))
