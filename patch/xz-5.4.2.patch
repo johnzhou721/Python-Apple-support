@@ -15,7 +15,7 @@ diff -ur xz-5.4.2-orig/build-aux/config.sub xz-5.4.2/build-aux/config.sub
  	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
  	     | hiux* | abug | nacl* | netware* | windows* \
 -	     | os9* | macos* | osx* | ios* \
-+	     | os9* | macos* | osx* | ios* | tvos* | watchos* \
++	     | os9* | macos* | osx* | ios* | tvos* | watchos* | macab* \
  	     | mpw* | magic* | mmixware* | mon960* | lnews* \
  	     | amigaos* | amigados* | msdos* | newsos* | unicos* | aof* \
  	     | aos* | aros* | cloudabi* | sortix* | twizzler* \
@@ -24,7 +24,7 @@ diff -ur xz-5.4.2-orig/build-aux/config.sub xz-5.4.2/build-aux/config.sub
  		;;
  	*-eabi* | *-gnueabi*)
 +		;;
-+	ios*-simulator | tvos*-simulator | watchos*-simulator)
++	ios*-simulator | tvos*-simulator | watchos*-simulator | ios*-macabi)
  		;;
  	-*)
  		# Blank kernel with real OS is always fine.
