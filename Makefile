@@ -61,7 +61,7 @@ PYTHON_CONFIGURE-watchOS=ac_cv_func_sigaltstack=no
 TARGETS-xrOS=xrsimulator.arm64 xros.arm64
 VERSION_MIN-xrOS=1.0
 CFLAGS-xrOS=
-PYTHON_CONFIGURE-xrOS=ac_cv_func_sigaltstack=no
+#PYTHON_CONFIGURE-xrOS=ac_cv_func_sigaltstack=no
 
 # The architecture of the machine doing the build
 HOST_ARCH=$(shell uname -m)
@@ -84,13 +84,6 @@ all: $(OS_LIST) macCatalyst
 # Full clean - includes all downloaded products
 distclean: clean
 	rm -rf downloads build dist install support macios.tar.gz
-
-macCatalyst:
-	$(MAKE) -C macios
-	-mkdir support/macios
-	cp -r macios/support/* support/macios
-	-mkdir dist/macios
-	cp -r macios/dist/* dist/macios
 
 macCatalyst:
 	$(MAKE) -C macios
