@@ -66,7 +66,7 @@ jobs:
         echo "LIBFFI_VERSION=${LIBFFI_VERSION}" | tee -a ${GITHUB_OUTPUT}
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4.3.0
+      uses: actions/upload-artifact@v4.3.1
       with:
         name: dist-${{ matrix.target }}
         path: dist
@@ -78,14 +78,14 @@ jobs:
     needs: build
     steps:
     - name: Get build artifacts
-      uses: actions/download-artifact@v4.1.1
+      uses: actions/download-artifact@v4.1.2
       with:
         pattern: dist-*
         path: dist
         merge-multiple: true
 
     - name: Create Release
-      uses: ncipollo/release-action@v1.13.0
+      uses: ncipollo/release-action@v1.14.0
       with:
         name: ${{ needs.build.outputs.PYTHON_VER }}-${{ needs.build.outputs.BUILD_NUMBER }}
         tag: ${{ needs.build.outputs.PYTHON_VER }}-${{ needs.build.outputs.BUILD_NUMBER }}
